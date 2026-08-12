@@ -65,16 +65,6 @@ export default function ScrollGallery() {
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768;
 
-      /*
-       * Initial arrangement
-       *
-       *           NEXT
-       *
-       * PREVIOUS   CENTER   NEXT
-       *
-       * The center card is always the active card.
-       */
-
       gsap.set(cards, {
         xPercent: -50,
         yPercent: -50,
@@ -89,29 +79,25 @@ export default function ScrollGallery() {
         let zIndex = 50;
 
         if (index === 0) {
-          // First card starts in center
-          x = 0;
+          x = isMobile ? 0 : 20;
           scale = 1;
           rotate = 0;
           opacity = 1;
           zIndex = 50;
         } else if (index === 1) {
-          // Next card sits on right
-          x = isMobile ? 42 : 30;
+          x = isMobile ? 42 : 48;
           scale = 0.72;
           rotate = 4;
           opacity = 0.65;
           zIndex = 30;
         } else if (index === images.length - 1) {
-          // Previous card sits on left
-          x = isMobile ? -42 : -30;
+          x = isMobile ? -42 : -8;
           scale = 0.72;
           rotate = -4;
           opacity = 0.65;
           zIndex = 30;
         } else {
-          // Cards behind the deck
-          x = 0;
+          x = 20;
           scale = 0.6;
           rotate = 0;
           opacity = 0;
@@ -127,11 +113,6 @@ export default function ScrollGallery() {
         });
       });
 
-      /*
-       * MASTER TIMELINE
-       *
-       * Every transition changes which image is in the center.
-       */
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -143,9 +124,6 @@ export default function ScrollGallery() {
         },
       });
 
-      /*
-       * We create a transition for every image.
-       */
       for (let step = 0; step < images.length - 1; step++) {
         const currentIndex = step;
         const nextIndex = step + 1;
@@ -153,24 +131,19 @@ export default function ScrollGallery() {
         const current = cards[currentIndex];
         const next = cards[nextIndex];
 
-        /*
-         * Prepare next card on the RIGHT.
-         */
         gsap.set(next, {
-          x: isMobile ? "42vw" : "30vw",
+          x: isMobile ? "42vw" : "48vw",
           scale: 0.72,
           rotate: 4,
           opacity: 0.65,
           zIndex: 30,
         });
 
-        /*
-         * Current center card moves LEFT/BACK.
-         */
+        // Current card moves left
         tl.to(
           current,
           {
-            x: isMobile ? "-42vw" : "-30vw",
+            x: isMobile ? "-42vw" : "-8vw",
             scale: 0.72,
             rotate: -4,
             opacity: 0.55,
@@ -181,13 +154,11 @@ export default function ScrollGallery() {
           step
         );
 
-        /*
-         * Next card comes from RIGHT → CENTER.
-         */
+        // Next card moves into center
         tl.to(
           next,
           {
-            x: "0vw",
+            x: isMobile ? "0vw" : "20vw",
             scale: 1,
             rotate: 0,
             opacity: 1,
@@ -198,16 +169,14 @@ export default function ScrollGallery() {
           step
         );
 
-        /*
-         * Put the following card behind the right side.
-         */
+        // Following card waits on right
         if (step + 2 < images.length) {
           const following = cards[step + 2];
 
           tl.set(
             following,
             {
-              x: isMobile ? "42vw" : "30vw",
+              x: isMobile ? "42vw" : "48vw",
               scale: 0.72,
               rotate: 4,
               opacity: 0.65,
@@ -225,9 +194,11 @@ export default function ScrollGallery() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen w-full overflow-hidden bg-[#f7f7f2]"
+      id="about"
+      className="relative h-screen w-full overflow-hidden bg-[#E9E9E5] text-[#111]"
     >
-      {/* SUBTLE TOPOGRAPHIC BACKGROUND */}
+      {/* BACKGROUND */}
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg
           className="absolute h-full w-full"
@@ -236,8 +207,8 @@ export default function ScrollGallery() {
         >
           <g
             fill="none"
-            stroke="#d6d6ce"
-            strokeWidth="2"
+            stroke="#d1d1ca"
+            strokeWidth="1"
             opacity="0.55"
           >
             <path d="M-100 180 C120 40 260 300 480 140 S850 80 1050 200 S1400 300 1700 100" />
@@ -254,14 +225,18 @@ export default function ScrollGallery() {
         </svg>
       </div>
 
-      {/* SMALL HEADER */}
-      <div className="absolute left-8 top-8 z-[100]">
-        <p className="text-xs font-semibold tracking-[0.2em]">
-       
-        </p>
-      </div>
+      {/* TOP HEADING */}
+
+      <div className="pointer-events-none absolute left-6 top-8 z-[100] md:left-10 md:top-8">
+        <div className="mb-2 h-[2px] w-6 bg-black/40 md:w-10" />
+        <div className="mb-5" />
+        <h2 className="font-display text-[clamp(3.2rem,6vw,6rem)] uppercase leading-[0.85]">
+          About
+        </h2>
+      </div> 
 
       {/* GALLERY */}
+
       <div className="relative z-20 h-full w-full">
         {images.map((image, index) => (
           <div
@@ -269,10 +244,16 @@ export default function ScrollGallery() {
             ref={(el) => {
               if (el) cardsRef.current[index] = el;
             }}
-            className="absolute left-1/2 top-1/2 w-[clamp(190px,28vw,420px)]"
+            className="
+              absolute
+              left-1/2
+              top-1/2
+              w-[clamp(190px,28vw,420px)]
+            "
           >
-            {/* CARD */}
             <div className="relative">
+              {/* IMAGE */}
+
               <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[3px] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
                 <Image
                   src={image.src}
@@ -282,15 +263,18 @@ export default function ScrollGallery() {
                   className="object-cover"
                   sizes="(max-width: 768px) 70vw, 30vw"
                 />
+
+                <div className="absolute left-4 top-4 text-[10px] tracking-widest text-white drop-shadow-md md:text-xs">
+                  {String(index + 1).padStart(2, "0")} / 05
+                </div>
               </div>
 
               {/* CAPTION */}
+
               <div className="mt-3 flex items-start justify-between border-t border-black/20 pt-2">
-                <div>
-                  <p className="text-[10px] font-semibold tracking-[0.18em]">
-                    {image.label}
-                  </p>
-                </div>
+                <p className="text-[10px] font-semibold tracking-[0.18em]">
+                  {image.label}
+                </p>
 
                 <p className="text-[10px] tracking-[0.15em] text-black/50">
                   {image.year}
@@ -300,10 +284,20 @@ export default function ScrollGallery() {
           </div>
         ))}
       </div>
+
       {/* PROGRESS */}
+
       <div className="absolute bottom-8 right-8 z-[100]">
         <p className="text-[9px] tracking-[0.2em] text-black/45">
           01 — 05
+        </p>
+      </div>
+
+      {/* SCROLL INDICATOR */}
+
+      <div className="absolute bottom-8 left-8 z-[100]">
+        <p className="text-[9px] uppercase tracking-[0.25em] text-black/45">
+          Scroll →
         </p>
       </div>
     </section>

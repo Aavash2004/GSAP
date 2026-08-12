@@ -6,7 +6,7 @@ export default function HeroHeadline() {
       {/* Left-side text */}
       <div className="absolute left-6 top-1/2 max-w-[420px] -translate-y-1/2 md:left-10 lg:left-16">
         <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-black/45">
-          Software Developer
+         Frontend Developer
         </p>
 
         <h1 className="text-5xl font-bold uppercase leading-[0.88] tracking-[-0.04em] md:text-7xl lg:text-8xl">
