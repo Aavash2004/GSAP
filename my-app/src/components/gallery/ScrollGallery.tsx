@@ -1,0 +1,311 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+type GalleryImage = {
+  id: string;
+  src: string;
+  alt: string;
+  label: string;
+  year: string;
+};
+
+const images: GalleryImage[] = [
+  {
+    id: "main",
+    src: "/images/a1.jpeg",
+    alt: "Main portrait",
+    label: "ABOUT ME",
+    year: "2026",
+  },
+  {
+    id: "mountain",
+    src: "/images/a3.jpeg",
+    alt: "Mountain",
+    label: "ADVENTURE",
+    year: "2025",
+  },
+  {
+    id: "football",
+    src: "/images/f1.jpeg",
+    alt: "Football",
+    label: "FOOTBALL",
+    year: "2023",
+  },
+  {
+    id: "garden",
+    src: "/images/a2.jpeg",
+    alt: "Garden",
+    label: "EARLY DAYS",
+    year: "2024",
+  },
+  {
+    id: "profile",
+    src: "/images/aab3.png",
+    alt: "Profile",
+    label: "PROFILE",
+    year: "2026",
+  },
+];
+
+export default function ScrollGallery() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardsRef = useRef<HTMLDivElement[]>([]);
+
+  useEffect(() => {
+    const cards = cardsRef.current;
+
+    if (!cards.length) return;
+
+    const ctx = gsap.context(() => {
+      const isMobile = window.innerWidth < 768;
+
+      /*
+       * Initial arrangement
+       *
+       *           NEXT
+       *
+       * PREVIOUS   CENTER   NEXT
+       *
+       * The center card is always the active card.
+       */
+
+      gsap.set(cards, {
+        xPercent: -50,
+        yPercent: -50,
+        transformOrigin: "center center",
+      });
+
+      cards.forEach((card, index) => {
+        let x = 0;
+        let scale = 1;
+        let rotate = 0;
+        let opacity = 1;
+        let zIndex = 50;
+
+        if (index === 0) {
+          // First card starts in center
+          x = 0;
+          scale = 1;
+          rotate = 0;
+          opacity = 1;
+          zIndex = 50;
+        } else if (index === 1) {
+          // Next card sits on right
+          x = isMobile ? 42 : 30;
+          scale = 0.72;
+          rotate = 4;
+          opacity = 0.65;
+          zIndex = 30;
+        } else if (index === images.length - 1) {
+          // Previous card sits on left
+          x = isMobile ? -42 : -30;
+          scale = 0.72;
+          rotate = -4;
+          opacity = 0.65;
+          zIndex = 30;
+        } else {
+          // Cards behind the deck
+          x = 0;
+          scale = 0.6;
+          rotate = 0;
+          opacity = 0;
+          zIndex = 10;
+        }
+
+        gsap.set(card, {
+          x: `${x}vw`,
+          scale,
+          rotate,
+          opacity,
+          zIndex,
+        });
+      });
+
+      /*
+       * MASTER TIMELINE
+       *
+       * Every transition changes which image is in the center.
+       */
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: isMobile ? "+=500%" : "+=700%",
+          scrub: 1.2,
+          pin: true,
+          anticipatePin: 1,
+        },
+      });
+
+      /*
+       * We create a transition for every image.
+       */
+      for (let step = 0; step < images.length - 1; step++) {
+        const currentIndex = step;
+        const nextIndex = step + 1;
+
+        const current = cards[currentIndex];
+        const next = cards[nextIndex];
+
+        /*
+         * Prepare next card on the RIGHT.
+         */
+        gsap.set(next, {
+          x: isMobile ? "42vw" : "30vw",
+          scale: 0.72,
+          rotate: 4,
+          opacity: 0.65,
+          zIndex: 30,
+        });
+
+        /*
+         * Current center card moves LEFT/BACK.
+         */
+        tl.to(
+          current,
+          {
+            x: isMobile ? "-42vw" : "-30vw",
+            scale: 0.72,
+            rotate: -4,
+            opacity: 0.55,
+            zIndex: 20,
+            duration: 1,
+            ease: "power2.inOut",
+          },
+          step
+        );
+
+        /*
+         * Next card comes from RIGHT → CENTER.
+         */
+        tl.to(
+          next,
+          {
+            x: "0vw",
+            scale: 1,
+            rotate: 0,
+            opacity: 1,
+            zIndex: 50,
+            duration: 1,
+            ease: "power2.inOut",
+          },
+          step
+        );
+
+        /*
+         * Put the following card behind the right side.
+         */
+        if (step + 2 < images.length) {
+          const following = cards[step + 2];
+
+          tl.set(
+            following,
+            {
+              x: isMobile ? "42vw" : "30vw",
+              scale: 0.72,
+              rotate: 4,
+              opacity: 0.65,
+              zIndex: 30,
+            },
+            step + 0.85
+          );
+        }
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative h-screen w-full overflow-hidden bg-[#f7f7f2]"
+    >
+      {/* SUBTLE TOPOGRAPHIC BACKGROUND */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <svg
+          className="absolute h-full w-full"
+          viewBox="0 0 1600 900"
+          preserveAspectRatio="none"
+        >
+          <g
+            fill="none"
+            stroke="#d6d6ce"
+            strokeWidth="2"
+            opacity="0.55"
+          >
+            <path d="M-100 180 C120 40 260 300 480 140 S850 80 1050 200 S1400 300 1700 100" />
+            <path d="M-100 230 C120 90 280 350 500 190 S870 130 1070 250 S1420 350 1700 150" />
+            <path d="M-100 280 C100 130 300 400 520 240 S900 180 1090 300 S1450 400 1700 200" />
+
+            <path d="M-100 700 C120 560 300 800 500 650 S800 570 1000 700 S1400 800 1700 600" />
+            <path d="M-100 750 C120 610 320 850 520 700 S820 620 1020 750 S1420 850 1700 650" />
+            <path d="M-100 800 C100 660 340 900 540 750 S840 670 1040 800 S1440 900 1700 700" />
+
+            <path d="M1200 -100 C1050 120 1300 200 1150 400 S1050 700 1250 850" />
+            <path d="M1270 -100 C1120 130 1370 210 1220 410 S1120 710 1320 860" />
+          </g>
+        </svg>
+      </div>
+
+      {/* SMALL HEADER */}
+      <div className="absolute left-8 top-8 z-[100]">
+        <p className="text-xs font-semibold tracking-[0.2em]">
+       
+        </p>
+      </div>
+
+      {/* GALLERY */}
+      <div className="relative z-20 h-full w-full">
+        {images.map((image, index) => (
+          <div
+            key={image.id}
+            ref={(el) => {
+              if (el) cardsRef.current[index] = el;
+            }}
+            className="absolute left-1/2 top-1/2 w-[clamp(190px,28vw,420px)]"
+          >
+            {/* CARD */}
+            <div className="relative">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[3px] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  priority={index < 2}
+                  className="object-cover"
+                  sizes="(max-width: 768px) 70vw, 30vw"
+                />
+              </div>
+
+              {/* CAPTION */}
+              <div className="mt-3 flex items-start justify-between border-t border-black/20 pt-2">
+                <div>
+                  <p className="text-[10px] font-semibold tracking-[0.18em]">
+                    {image.label}
+                  </p>
+                </div>
+
+                <p className="text-[10px] tracking-[0.15em] text-black/50">
+                  {image.year}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* PROGRESS */}
+      <div className="absolute bottom-8 right-8 z-[100]">
+        <p className="text-[9px] tracking-[0.2em] text-black/45">
+          01 — 05
+        </p>
+      </div>
+    </section>
+  );
+}
