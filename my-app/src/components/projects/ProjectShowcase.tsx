@@ -33,7 +33,7 @@ const projects = [
       "A modern blogging platform designed for publishing and exploring digital content.",
     tech: "NEXT.JS · TYPESCRIPT",
     image: "/images/blog.png",
-    url: "#",
+    url: "https://dummymodel.vercel.app/",
   },
 ];
 

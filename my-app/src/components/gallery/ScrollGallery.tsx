@@ -57,140 +57,112 @@ export default function ScrollGallery() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
 
-  useEffect(() => {
-    const cards = cardsRef.current;
+ useEffect(() => {
+  const cards = cardsRef.current;
 
-    if (!cards.length) return;
+  if (!cards.length || !sectionRef.current) return;
 
-    const ctx = gsap.context(() => {
-      const isMobile = window.innerWidth < 768;
+  const ctx = gsap.context(() => {
+    const isMobile = window.innerWidth < 768;
 
-      gsap.set(cards, {
-        xPercent: -50,
-        yPercent: -50,
-        transformOrigin: "center center",
-      });
-
-      cards.forEach((card, index) => {
-        let x = 0;
-        let scale = 1;
-        let rotate = 0;
-        let opacity = 1;
-        let zIndex = 50;
-
-        if (index === 0) {
-          x = isMobile ? 0 : 20;
-          scale = 1;
-          rotate = 0;
-          opacity = 1;
-          zIndex = 50;
-        } else if (index === 1) {
-          x = isMobile ? 42 : 48;
-          scale = 0.72;
-          rotate = 4;
-          opacity = 0.65;
-          zIndex = 30;
-        } else if (index === images.length - 1) {
-          x = isMobile ? -42 : -8;
-          scale = 0.72;
-          rotate = -4;
-          opacity = 0.65;
-          zIndex = 30;
-        } else {
-          x = 20;
-          scale = 0.6;
-          rotate = 0;
-          opacity = 0;
-          zIndex = 10;
-        }
-
+    // Initial card positions
+    cards.forEach((card, index) => {
+      if (index === 0) {
         gsap.set(card, {
-          x: `${x}vw`,
-          scale,
-          rotate,
-          opacity,
-          zIndex,
+          x: "0vw",
+          y: "-50%",
+          scale: 1,
+          rotate: 0,
+          opacity: 1,
+          zIndex: 50,
         });
-      });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: isMobile ? "+=500%" : "+=700%",
-          scrub: 1.2,
-          pin: true,
-          anticipatePin: 1,
-        },
-      });
-
-      for (let step = 0; step < images.length - 1; step++) {
-        const currentIndex = step;
-        const nextIndex = step + 1;
-
-        const current = cards[currentIndex];
-        const next = cards[nextIndex];
-
-        gsap.set(next, {
-          x: isMobile ? "42vw" : "48vw",
+      } else if (index === 1) {
+        gsap.set(card, {
+          x: isMobile ? "42vw" : "30vw",
+          y: "-50%",
           scale: 0.72,
           rotate: 4,
           opacity: 0.65,
           zIndex: 30,
         });
-
-        // Current card moves left
-        tl.to(
-          current,
-          {
-            x: isMobile ? "-42vw" : "-8vw",
-            scale: 0.72,
-            rotate: -4,
-            opacity: 0.55,
-            zIndex: 20,
-            duration: 1,
-            ease: "power2.inOut",
-          },
-          step
-        );
-
-        // Next card moves into center
-        tl.to(
-          next,
-          {
-            x: isMobile ? "0vw" : "20vw",
-            scale: 1,
-            rotate: 0,
-            opacity: 1,
-            zIndex: 50,
-            duration: 1,
-            ease: "power2.inOut",
-          },
-          step
-        );
-
-        // Following card waits on right
-        if (step + 2 < images.length) {
-          const following = cards[step + 2];
-
-          tl.set(
-            following,
-            {
-              x: isMobile ? "42vw" : "48vw",
-              scale: 0.72,
-              rotate: 4,
-              opacity: 0.65,
-              zIndex: 30,
-            },
-            step + 0.85
-          );
-        }
+      } else {
+        gsap.set(card, {
+          x: "0vw",
+          y: "-50%",
+          scale: 0.6,
+          rotate: 0,
+          opacity: 0,
+          zIndex: 10,
+        });
       }
-    }, sectionRef);
+    });
 
-    return () => ctx.revert();
-  }, []);
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top",
+        end: isMobile ? "+=500%" : "+=650%",
+        scrub: 1.2,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
 
+    for (let step = 0; step < cards.length - 1; step++) {
+      const current = cards[step];
+      const next = cards[step + 1];
+
+      // Current image moves CENTER → LEFT
+      tl.to(
+        current,
+        {
+          x: isMobile ? "-42vw" : "-30vw",
+          scale: 0.72,
+          rotate: -4,
+          opacity: 0.55,
+          zIndex: 20,
+          duration: 1,
+          ease: "power2.inOut",
+        },
+        step
+      );
+
+      // Next image moves RIGHT → CENTER
+      tl.to(
+        next,
+        {
+          x: "0vw",
+          scale: 1,
+          rotate: 0,
+          opacity: 1,
+          zIndex: 50,
+          duration: 1,
+          ease: "power2.inOut",
+        },
+        step
+      );
+
+      // Following image waits on RIGHT
+      if (step + 2 < cards.length) {
+        tl.set(
+          cards[step + 2],
+          {
+            x: isMobile ? "42vw" : "30vw",
+            y: "-50%",
+            scale: 0.72,
+            rotate: 4,
+            opacity: 0.65,
+            zIndex: 30,
+          },
+          step + 0.8
+        );
+      }
+    }
+  }, sectionRef);
+
+  return () => ctx.revert();
+}, []);
   return (
     <section
       ref={sectionRef}
@@ -227,30 +199,28 @@ export default function ScrollGallery() {
 
       {/* TOP HEADING */}
 
-      <div className="pointer-events-none absolute left-6 top-8 z-[100] md:left-10 md:top-8">
-        <div className="mb-2 h-[2px] w-6 bg-black/40 md:w-10" />
-        <div className="mb-5" />
-        <h2 className="font-display text-[clamp(3.2rem,6vw,6rem)] uppercase leading-[0.85]">
-          About
-        </h2>
-      </div> 
+      <div className="pointer-events-none absolute left-6 top-28 z-[100] md:left-10 md:top-32">
+  <h2 className="font-display text-[clamp(3.2rem,6vw,6rem)] uppercase leading-[0.85]">
+    About
+  </h2>
+</div>
 
       {/* GALLERY */}
 
       <div className="relative z-20 h-full w-full">
         {images.map((image, index) => (
           <div
-            key={image.id}
-            ref={(el) => {
-              if (el) cardsRef.current[index] = el;
-            }}
-            className="
-              absolute
-              left-1/2
-              top-1/2
-              w-[clamp(190px,28vw,420px)]
-            "
-          >
+  key={image.id}
+  ref={(el) => {
+    if (el) cardsRef.current[index] = el;
+  }}
+  className="
+    absolute
+    left-1/2
+    top-1/2
+    w-[clamp(190px,28vw,420px)]
+"
+>
             <div className="relative">
               {/* IMAGE */}
 
