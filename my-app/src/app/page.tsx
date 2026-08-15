@@ -7,6 +7,8 @@ import ParticlesBackground from "@/components/shared/ParticlesBackground";
 import InteractiveBackground from "@/components/shared/InteractiveBackground";
 import BeamsBackground from "@/components/shared/BeamsBackground";
 import Reveal from "@/components/shared/Reveal";
+import InspirationShowcase from "@/components/inspiration/InspirationShowcase";
+import ProjectToInspiration from "@/components/transitions/ProjectToInspiration";
 
 export default function Home() {
   return (
@@ -20,6 +22,10 @@ export default function Home() {
 
       {/* PROJECTS */}
       <ProjectShowcase />
+
+<ProjectToInspiration>
+       <InspirationShowcase />
+</ProjectToInspiration>
 
       {/* CONTACT */}
       <section
