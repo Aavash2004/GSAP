@@ -12,7 +12,7 @@ const projects = [
     number: "01",
     title: "Personal Portfolio",
     description:
-      "An interactive portfolio focused on modern web experiences, animation and visual storytelling.",
+      "An interactive developer portfolio focused on modern web experiences, animation and visual storytelling.",
     tech: "NEXT.JS · REACT · TYPESCRIPT · GSAP",
     image: "/images/portfolio.png",
     url: "https://portfolio-five-xi-bkrbjy6mfr.vercel.app/",
@@ -30,7 +30,7 @@ const projects = [
     number: "03",
     title: "Blog",
     description:
-      "A clean blogging platform for publishing and exploring digital content.",
+      "A modern blogging platform designed for publishing and exploring digital content.",
     tech: "NEXT.JS · TYPESCRIPT",
     image: "/images/blog.png",
     url: "https://dummymodel.vercel.app/",
@@ -50,65 +50,56 @@ export default function ProjectShowcase() {
     if (!section || !track) return;
 
     const ctx = gsap.context(() => {
-      const isMobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 768;
 
-      const getScrollAmount = () =>
+      const getHorizontalDistance = () =>
         Math.max(0, track.scrollWidth - window.innerWidth);
 
-      const foldDistance = window.innerHeight * (isMobile ? 0.9 : 1.25);
-
-      const getTotalDistance = () =>
-        getScrollAmount() + foldDistance;
+      const foldDistance = window.innerHeight * (mobile ? 0.9 : 1.25);
 
       /*
-       * PROJECT → NEXT SECTION TRANSITION
+       * ---------------------------------------------------------
+       * MAIN PROJECT TIMELINE
+       * ---------------------------------------------------------
        */
 
-      gsap.set(section, {
-        transformOrigin: "50% 0%",
-        transformStyle: "preserve-3d",
-      });
-
-      /*
-       * ONE MASTER TIMELINE
-       */
-
-      const tl = gsap.timeline({
+      const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => `+=${getTotalDistance()}`,
+          end: () =>
+            `+=${getHorizontalDistance() + foldDistance}`,
           pin: true,
-          scrub: 1.1,
+          scrub: 1,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
 
       /*
-       * HORIZONTAL PROJECT SCROLL
+       * Horizontal movement
        */
 
-      tl.to(
+      timeline.to(
         track,
         {
-          x: () => -getScrollAmount(),
-          duration: getScrollAmount() || 1,
+          x: () => -getHorizontalDistance(),
+          duration: () => getHorizontalDistance() || 1,
           ease: "none",
         },
         0
       );
 
       /*
-       * BACKGROUND PARALLAX
+       * Background movement
        */
 
       if (background) {
-        tl.to(
+        timeline.to(
           background,
           {
             x: "-4vw",
-            duration: getScrollAmount() || 1,
+            duration: () => getHorizontalDistance() || 1,
             ease: "none",
           },
           0
@@ -116,21 +107,28 @@ export default function ProjectShowcase() {
       }
 
       /*
-       * 3D FOLD INTO NEXT SECTION
+       * ---------------------------------------------------------
+       * FOLD INTO NEXT SECTION
+       * ---------------------------------------------------------
        */
 
-      tl.to(
+      gsap.set(section, {
+        transformOrigin: "50% 0%",
+        transformStyle: "preserve-3d",
+      });
+
+      timeline.to(
         section,
         {
-          rotateX: isMobile ? -7 : -16,
-          scale: isMobile ? 0.96 : 0.9,
-          y: isMobile ? "-5%" : "-10%",
-          borderRadius: isMobile ? "18px" : "32px",
+          rotateX: mobile ? -6 : -14,
+          scale: mobile ? 0.97 : 0.9,
+          y: mobile ? "-4%" : "-8%",
+          borderRadius: mobile ? "18px" : "28px",
           opacity: 0,
           duration: foldDistance,
           ease: "power2.inOut",
         },
-        getScrollAmount() || 1
+        getHorizontalDistance() || 1
       );
     }, section);
 
@@ -150,7 +148,9 @@ export default function ProjectShowcase() {
         text-[#111]
       "
     >
-      {/* BACKGROUND */}
+      {/* =====================================================
+          BACKGROUND
+      ====================================================== */}
 
       <div
         ref={backgroundRef}
@@ -166,32 +166,32 @@ export default function ProjectShowcase() {
         <div
           className="
             absolute
-            -left-[12%]
-            top-[5%]
-            h-[55vh]
-            w-[55vh]
+            left-[18%]
+            top-[12%]
+            h-[50vh]
+            w-[50vh]
             rounded-full
-            bg-white/35
-            blur-3xl
+            bg-white/30
+            blur-[110px]
           "
         />
 
-        {/* Soft shadow */}
+        {/* Soft lower shadow */}
 
         <div
           className="
             absolute
-            -right-[12%]
-            bottom-[-18%]
-            h-[65vh]
-            w-[65vh]
+            bottom-[-20%]
+            right-[-8%]
+            h-[55vh]
+            w-[55vh]
             rounded-full
-            bg-[#D5D5D0]/30
-            blur-3xl
+            bg-[#D4D4CF]/25
+            blur-[110px]
           "
         />
 
-        {/* Topographic lines */}
+        {/* Very subtle contour lines */}
 
         <svg
           className="
@@ -199,69 +199,74 @@ export default function ProjectShowcase() {
             inset-0
             h-full
             w-full
-            opacity-[0.1]
           "
-          viewBox="0 0 1440 900"
+          viewBox="0 0 1600 900"
           preserveAspectRatio="none"
+          aria-hidden="true"
         >
-          <path
-            d="M-100 500 C200 250 350 700 650 400 S1100 100 1540 350"
+          <g
             fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
+            stroke="#c7c7c0"
+            strokeWidth="0.8"
+            opacity="0.24"
+          >
+            <path d="M-100 520 C180 280 390 720 680 410 S1100 130 1710 390" />
 
-          <path
-            d="M-100 560 C200 310 350 760 650 460 S1100 160 1540 410"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
+            <path d="M-100 570 C180 330 390 770 680 460 S1100 180 1710 440" />
 
-          <path
-            d="M-100 620 C200 370 350 820 650 520 S1100 220 1540 470"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
+            <path d="M-100 620 C180 380 390 820 680 510 S1100 230 1710 490" />
 
-          <path
-            d="M-100 680 C200 430 350 880 650 580 S1100 280 1540 530"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
+            <path d="M-100 670 C180 430 390 870 680 560 S1100 280 1710 540" />
+          </g>
         </svg>
       </div>
 
-      {/* PROJECT HEADING */}
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
 
-      <div
+      <header
         className="
           pointer-events-none
           absolute
           left-6
-          top-7
-          z-30
+          top-24
+          z-[100]
+
           md:left-10
-          md:top-8
+          md:top-28
         "
       >
+        <p
+          className="
+            mb-3
+            text-[8px]
+            font-medium
+            uppercase
+            tracking-[0.28em]
+            text-black/35
+          "
+        >
+          02 / Selected work
+        </p>
+
         <h2
           className="
             font-display
-            text-[clamp(2.8rem,5vw,5rem)]
-            font-normal
+            text-[clamp(3rem,5vw,5rem)]
+            font-medium
             uppercase
-            leading-none
-            tracking-[-0.045em]
+            leading-[0.82]
+            tracking-[-0.035em]
           "
         >
           Projects
         </h2>
-      </div>
+      </header>
 
-      {/* PROJECT TRACK */}
+      {/* =====================================================
+          HORIZONTAL PROJECT TRACK
+      ====================================================== */}
 
       <div
         ref={trackRef}
@@ -272,10 +277,9 @@ export default function ProjectShowcase() {
           h-full
           w-max
           items-center
-          gap-[4vw]
+          gap-[7vw]
           px-[7vw]
-          pt-8
-          will-change-transform
+          pt-[5vh]
         "
       >
         {projects.map((project) => (
@@ -284,37 +288,37 @@ export default function ProjectShowcase() {
             className="
               relative
               grid
-              h-[54vh]
-              w-[70vw]
+              h-[56vh]
+              w-[76vw]
               shrink-0
-              grid-cols-[minmax(0,1fr)_minmax(220px,0.55fr)]
+              grid-cols-[minmax(0,1.1fr)_minmax(220px,0.7fr)]
               items-center
-              gap-[4vw]
+              gap-[5vw]
 
-              lg:h-[56vh]
-              lg:w-[68vw]
-
-              xl:w-[66vw]
+              lg:w-[70vw]
+              xl:w-[67vw]
             "
           >
-            {/* IMAGE */}
+            {/* =================================================
+                IMAGE
+            ================================================== */}
 
             <div
               className="
                 group
                 relative
-                h-[36vh]
+                h-[34vh]
                 w-full
-                max-w-[470px]
+                max-w-[500px]
                 justify-self-end
                 overflow-hidden
-                bg-[#dcdcd7]
+                rounded-[2px]
+                bg-[#deded9]
+                shadow-[0_18px_50px_rgba(0,0,0,0.07)]
 
-                md:h-[39vh]
-
-                lg:h-[41vh]
-
-                xl:h-[43vh]
+                sm:h-[36vh]
+                lg:h-[39vh]
+                xl:h-[41vh]
               "
             >
               <Image
@@ -322,35 +326,38 @@ export default function ProjectShowcase() {
                 alt={project.title}
                 fill
                 priority={project.number === "01"}
+                loading={project.number === "01" ? "eager" : "lazy"}
                 className="
                   object-cover
                   transition-transform
                   duration-700
                   ease-out
-                  group-hover:scale-[1.02]
+                  group-hover:scale-[1.025]
                 "
-                sizes="
-                  (max-width: 768px) 80vw,
-                  40vw
-                "
+                sizes="(max-width: 768px) 72vw, 38vw"
               />
+
+              {/* Image index */}
 
               <div
                 className="
                   absolute
-                  left-4
-                  top-4
+                  left-3
+                  top-3
                   text-[8px]
+                  font-medium
                   tracking-[0.18em]
-                  text-white/80
-                  drop-shadow
+                  text-white/90
+                  drop-shadow-[0_1px_4px_rgba(0,0,0,0.35)]
                 "
               >
-                {project.number}
+                {project.number} / 03
               </div>
             </div>
 
-            {/* INFORMATION */}
+            {/* =================================================
+                INFORMATION
+            ================================================== */}
 
             <div
               className="
@@ -362,7 +369,7 @@ export default function ProjectShowcase() {
                 justify-self-start
               "
             >
-              {/* SMALL NUMBER */}
+              {/* Small project marker */}
 
               <div
                 className="
@@ -370,66 +377,88 @@ export default function ProjectShowcase() {
                   flex
                   items-center
                   gap-3
-                  text-[8px]
-                  uppercase
-                  tracking-[0.24em]
-                  text-black/35
                 "
               >
-                <span>Project</span>
+                <span
+                  className="
+                    text-[8px]
+                    uppercase
+                    tracking-[0.28em]
+                    text-black/35
+                  "
+                >
+                  Project
+                </span>
 
-                <span className="h-px w-5 bg-black/15" />
+                <span
+                  className="
+                    h-px
+                    w-6
+                    bg-black/15
+                  "
+                />
 
-                <span>{project.number}</span>
+                <span
+                  className="
+                    text-[8px]
+                    tracking-[0.2em]
+                    text-black/35
+                  "
+                >
+                  {project.number}
+                </span>
               </div>
 
-              {/* TITLE */}
+              {/* Title */}
 
               <h3
                 className="
-                  max-w-[320px]
+                  max-w-[330px]
                   font-display
                   text-[clamp(2rem,2.8vw,3.4rem)]
-                  font-normal
+                  font-medium
                   uppercase
-                  leading-[0.9]
-                  tracking-[-0.04em]
+                  leading-[0.88]
+                  tracking-[-0.035em]
                 "
               >
                 {project.title}
               </h3>
 
-              {/* DESCRIPTION */}
+              {/* Description */}
 
               <p
                 className="
                   mt-5
                   max-w-[310px]
                   text-[11px]
-                  leading-[1.65]
+                  leading-[1.7]
                   text-black/50
-                  md:text-xs
+
+                  md:text-[12px]
                 "
               >
                 {project.description}
               </p>
 
-              {/* TECHNOLOGY */}
+              {/* Technology */}
 
               <p
                 className="
                   mt-5
                   text-[7px]
                   font-medium
-                  tracking-[0.18em]
-                  text-black/40
+                  uppercase
+                  tracking-[0.2em]
+                  text-black/35
+
                   md:text-[8px]
                 "
               >
                 {project.tech}
               </p>
 
-              {/* LINK */}
+              {/* Link */}
 
               <a
                 href={project.url}
@@ -444,19 +473,21 @@ export default function ProjectShowcase() {
                   gap-2
                   border-b
                   border-black/20
-                  pb-1.5
+                  pb-2
                   text-[8px]
+                  font-medium
                   uppercase
-                  tracking-[0.2em]
-                  text-black/60
+                  tracking-[0.22em]
+                  text-black/65
                   transition-all
                   duration-300
-                  hover:border-black
+                  hover:border-black/60
                   hover:text-black
+
                   md:text-[9px]
                 "
               >
-                <span>View Project</span>
+                <span>View project</span>
 
                 <span
                   className="
@@ -473,43 +504,53 @@ export default function ProjectShowcase() {
         ))}
       </div>
 
-      {/* PROJECT COUNTER */}
+      {/* =====================================================
+          FOOTER INFORMATION
+      ====================================================== */}
 
       <div
         className="
           absolute
-          bottom-6
+          bottom-7
           left-6
-          z-30
-          text-[8px]
-          tracking-[0.2em]
-          text-black/35
+          z-[100]
+
           md:bottom-8
           md:left-10
-          md:text-[9px]
         "
       >
-        01 — 03
+        <p
+          className="
+            text-[8px]
+            uppercase
+            tracking-[0.24em]
+            text-black/35
+          "
+        >
+          Selected work
+        </p>
       </div>
-
-      {/* SCROLL INDICATOR */}
 
       <div
         className="
           absolute
-          bottom-6
+          bottom-7
           right-6
-          z-30
-          text-[8px]
-          uppercase
-          tracking-[0.22em]
-          text-black/35
+          z-[100]
+
           md:bottom-8
           md:right-10
-          md:text-[9px]
         "
       >
-        Scroll →
+        <p
+          className="
+            text-[8px]
+            tracking-[0.2em]
+            text-black/35
+          "
+        >
+          01 — 03
+        </p>
       </div>
     </section>
   );

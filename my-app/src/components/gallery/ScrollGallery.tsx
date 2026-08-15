@@ -19,7 +19,7 @@ const images: GalleryImage[] = [
   {
     id: "main",
     src: "/images/a1.jpeg",
-    alt: "Main portrait",
+    alt: "Portrait",
     label: "ABOUT ME",
     year: "2026",
   },
@@ -59,29 +59,26 @@ export default function ScrollGallery() {
 
   useEffect(() => {
     const section = sectionRef.current;
-    const cards = cardsRef.current;
+    const cards = cardsRef.current.filter(Boolean);
 
     if (!section || !cards.length) return;
 
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768;
 
-      const sideX = isMobile ? 42 : 31;
-
       /*
-       * INITIAL STATE
+       * ---------------------------------------------------------
+       * INITIAL POSITIONS
+       * ---------------------------------------------------------
        */
 
       cards.forEach((card, index) => {
-        gsap.set(card, {
-          xPercent: -50,
-          yPercent: -50,
-          transformOrigin: "center center",
-        });
-
         if (index === 0) {
+          // Main image
           gsap.set(card, {
-            x: "0vw",
+            xPercent: -50,
+            yPercent: -50,
+            x: isMobile ? "0vw" : "4vw",
             y: "2vh",
             scale: 1,
             rotate: 0,
@@ -89,20 +86,26 @@ export default function ScrollGallery() {
             zIndex: 50,
           });
         } else if (index === 1) {
+          // Next image waiting on the right
           gsap.set(card, {
-            x: `${sideX}vw`,
-            y: "2vh",
-            scale: 0.74,
-            rotate: 4,
-            opacity: 0.55,
+            xPercent: -50,
+            yPercent: -50,
+            x: isMobile ? "40vw" : "31vw",
+            y: "5vh",
+            scale: 0.62,
+            rotate: 3,
+            opacity: 0.42,
             zIndex: 30,
           });
         } else {
+          // Remaining cards hidden
           gsap.set(card, {
-            x: "0vw",
-            y: "2vh",
-            scale: 0.62,
-            rotate: 0,
+            xPercent: -50,
+            yPercent: -50,
+            x: isMobile ? "42vw" : "32vw",
+            y: "5vh",
+            scale: 0.58,
+            rotate: 3,
             opacity: 0,
             zIndex: 10,
           });
@@ -110,14 +113,16 @@ export default function ScrollGallery() {
       });
 
       /*
+       * ---------------------------------------------------------
        * SCROLL TIMELINE
+       * ---------------------------------------------------------
        */
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: isMobile ? "+=500%" : "+=620%",
+          end: isMobile ? "+=520%" : "+=620%",
           scrub: 1.15,
           pin: true,
           anticipatePin: 1,
@@ -126,7 +131,7 @@ export default function ScrollGallery() {
       });
 
       /*
-       * EACH CARD TRANSITION
+       * Each image becomes the main image one after another.
        */
 
       for (let step = 0; step < cards.length - 1; step++) {
@@ -134,18 +139,16 @@ export default function ScrollGallery() {
         const next = cards[step + 1];
 
         /*
-         * CURRENT CARD → LEFT
+         * Current image moves to the left
          */
-
         tl.to(
           current,
           {
-            x: `${-sideX}vw`,
-            y: "-1vh",
-            scale: 0.74,
-            rotate: -4,
-            opacity: 0.45,
-            zIndex: 20,
+            x: isMobile ? "-40vw" : "-30vw",
+            y: "5vh",
+            scale: 0.62,
+            rotate: -3,
+            opacity: 0.34,
             duration: 1,
             ease: "power2.inOut",
           },
@@ -153,13 +156,12 @@ export default function ScrollGallery() {
         );
 
         /*
-         * NEXT CARD → CENTER
+         * Next image moves into the center
          */
-
         tl.to(
           next,
           {
-            x: "0vw",
+            x: isMobile ? "0vw" : "4vw",
             y: "2vh",
             scale: 1,
             rotate: 0,
@@ -172,27 +174,58 @@ export default function ScrollGallery() {
         );
 
         /*
-         * FOLLOWING CARD → RIGHT
+         * Prepare the following card on the right.
          */
-
         if (step + 2 < cards.length) {
           tl.set(
             cards[step + 2],
             {
-              x: `${sideX}vw`,
-              y: "2vh",
-              scale: 0.74,
-              rotate: 4,
-              opacity: 0.55,
+              xPercent: -50,
+              yPercent: -50,
+              x: isMobile ? "40vw" : "31vw",
+              y: "5vh",
+              scale: 0.62,
+              rotate: 3,
+              opacity: 0.42,
               zIndex: 30,
             },
-            step + 0.82
+            step + 0.78
           );
         }
       }
+
+      /*
+       * ---------------------------------------------------------
+       * SUBTLE FINAL EXIT
+       * ---------------------------------------------------------
+       */
+
+      const lastCard = cards[cards.length - 1];
+
+      tl.to(
+        lastCard,
+        {
+          y: "-4vh",
+          scale: 0.96,
+          opacity: 0.96,
+          duration: 0.7,
+          ease: "power2.out",
+        },
+        cards.length - 1
+      );
+
+      /*
+       * Refresh ScrollTrigger after layout is ready.
+       */
+
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+      });
     }, section);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -208,114 +241,120 @@ export default function ScrollGallery() {
         text-[#111]
       "
     >
-      {/* --------------------------------
+      {/* ======================================================
           BACKGROUND
-      -------------------------------- */}
+      ======================================================= */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {/* Very subtle light shape */}
+
+        <div
+          className="
+            absolute
+            left-[25%]
+            top-[18%]
+            h-[45vh]
+            w-[45vh]
+            rounded-full
+            bg-white/30
+            blur-[100px]
+          "
+        />
+
+        {/* Subtle contour lines */}
+
         <svg
-          className="absolute inset-0 h-full w-full"
+          className="
+            absolute
+            inset-0
+            h-full
+            w-full
+          "
           viewBox="0 0 1600 900"
           preserveAspectRatio="none"
+          aria-hidden="true"
         >
           <g
             fill="none"
-            stroke="#cfcfc8"
-            strokeWidth="1"
-            opacity="0.42"
+            stroke="#c9c9c2"
+            strokeWidth="0.7"
+            opacity="0.26"
           >
-            <path d="M-100 180 C120 40 260 300 480 140 S850 80 1050 200 S1400 300 1700 100" />
+            <path d="M-120 190 C160 50 300 300 520 160 S900 100 1120 210 S1450 300 1720 120" />
 
-            <path d="M-100 230 C120 90 280 350 500 190 S870 130 1070 250 S1420 350 1700 150" />
+            <path d="M-120 245 C160 105 320 355 540 215 S920 155 1140 265 S1470 355 1720 175" />
 
-            <path d="M-100 280 C100 130 300 400 520 240 S900 180 1090 300 S1450 400 1700 200" />
+            <path d="M-120 690 C160 550 320 800 540 660 S900 590 1120 700 S1460 810 1720 620" />
 
-            <path d="M-100 700 C120 560 300 800 500 650 S800 570 1000 700 S1400 800 1700 600" />
-
-            <path d="M-100 750 C120 610 320 850 520 700 S820 620 1020 750 S1420 850 1700 650" />
-
-            <path d="M1200 -100 C1050 120 1300 200 1150 400 S1050 700 1250 850" />
+            <path d="M-120 745 C160 605 340 855 560 715 S920 645 1140 755 S1480 865 1720 675" />
           </g>
         </svg>
       </div>
 
-      {/* --------------------------------
-          SECTION LABEL
-      -------------------------------- */}
+      {/* ======================================================
+          HEADER
+      ======================================================= */}
 
       <div
         className="
           pointer-events-none
           absolute
           left-6
-          top-8
+          top-24
           z-[100]
+
           md:left-10
-          md:top-9
+          md:top-28
         "
       >
-        <div className="flex items-center gap-3">
-          <span className="h-px w-7 bg-black/25" />
+        <p
+          className="
+            mb-3
+            text-[8px]
+            font-medium
+            uppercase
+            tracking-[0.28em]
+            text-black/35
+          "
+        >
+          01 / About
+        </p>
 
-          <span
-            className="
-              text-[9px]
-              uppercase
-              tracking-[0.3em]
-              text-black/45
-              md:text-[10px]
-            "
-          >
-            About
-          </span>
-        </div>
-      </div>
-
-      {/* --------------------------------
-          MAIN HEADING
-      -------------------------------- */}
-
-      <div
-        className="
-          pointer-events-none
-          absolute
-          left-6
-          top-[15vh]
-          z-[80]
-          md:left-10
-          md:top-[13vh]
-        "
-      >
         <h2
           className="
             font-display
-            text-[clamp(2.8rem,5vw,5.5rem)]
+            text-[clamp(3rem,5vw,5rem)]
+            font-medium
             uppercase
-            leading-[0.85]
-            tracking-[-0.045em]
+            leading-[0.82]
+            tracking-[-0.035em]
           "
         >
           About
         </h2>
       </div>
 
-      {/* --------------------------------
+      {/* ======================================================
           GALLERY
-      -------------------------------- */}
+      ======================================================= */}
 
       <div className="relative z-20 h-full w-full">
         {images.map((image, index) => (
           <div
             key={image.id}
             ref={(el) => {
-              if (el) cardsRef.current[index] = el;
+              if (el) {
+                cardsRef.current[index] = el;
+              }
             }}
             className="
               absolute
               left-1/2
               top-1/2
-              w-[clamp(180px,26vw,390px)]
+              w-[clamp(180px,23vw,340px)]
               will-change-transform
+
+              md:left-[56%]
             "
           >
             <div className="relative">
@@ -324,26 +363,27 @@ export default function ScrollGallery() {
               <div
                 className="
                   relative
-                  aspect-[4/5]
+                  aspect-[3/4]
                   w-full
                   overflow-hidden
-                  bg-[#deded8]
-                  shadow-[0_20px_50px_rgba(0,0,0,0.10)]
+                  rounded-[2px]
+                  bg-[#deded9]
+                  shadow-[0_18px_45px_rgba(0,0,0,0.08)]
                 "
               >
                 <Image
                   src={image.src}
                   alt={image.alt}
                   fill
-                  priority={index < 2}
+                  priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
                   className="
                     object-cover
                     transition-transform
                     duration-700
                     ease-out
-                    hover:scale-[1.02]
                   "
-                  sizes="(max-width: 768px) 65vw, 28vw"
+                  sizes="(max-width: 768px) 65vw, 23vw"
                 />
 
                 {/* IMAGE NUMBER */}
@@ -354,12 +394,14 @@ export default function ScrollGallery() {
                     left-3
                     top-3
                     text-[8px]
+                    font-medium
                     tracking-[0.18em]
-                    text-white/90
-                    drop-shadow-md
+                    text-white/85
+                    drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)]
                   "
                 >
-                  {String(index + 1).padStart(2, "0")} / 05
+                  {String(index + 1).padStart(2, "0")} /{" "}
+                  {String(images.length).padStart(2, "0")}
                 </div>
               </div>
 
@@ -372,7 +414,7 @@ export default function ScrollGallery() {
                   items-center
                   justify-between
                   border-t
-                  border-black/15
+                  border-black/10
                   pt-2
                 "
               >
@@ -380,8 +422,9 @@ export default function ScrollGallery() {
                   className="
                     text-[8px]
                     font-medium
-                    tracking-[0.18em]
-                    text-black/65
+                    uppercase
+                    tracking-[0.22em]
+                    text-black/70
                   "
                 >
                   {image.label}
@@ -390,7 +433,7 @@ export default function ScrollGallery() {
                 <p
                   className="
                     text-[8px]
-                    tracking-[0.15em]
+                    tracking-[0.18em]
                     text-black/35
                   "
                 >
@@ -402,9 +445,9 @@ export default function ScrollGallery() {
         ))}
       </div>
 
-      {/* --------------------------------
-          FOOTER META
-      -------------------------------- */}
+      {/* ======================================================
+          BOTTOM INFORMATION
+      ======================================================= */}
 
       <div
         className="
@@ -412,6 +455,7 @@ export default function ScrollGallery() {
           bottom-7
           left-6
           z-[100]
+
           md:bottom-8
           md:left-10
         "
@@ -420,12 +464,11 @@ export default function ScrollGallery() {
           className="
             text-[8px]
             uppercase
-            tracking-[0.25em]
+            tracking-[0.24em]
             text-black/35
-            md:text-[9px]
           "
         >
-          Scroll to explore
+          Scroll
         </p>
       </div>
 
@@ -435,6 +478,7 @@ export default function ScrollGallery() {
           bottom-7
           right-6
           z-[100]
+
           md:bottom-8
           md:right-10
         "
@@ -444,7 +488,6 @@ export default function ScrollGallery() {
             text-[8px]
             tracking-[0.2em]
             text-black/35
-            md:text-[9px]
           "
         >
           01 — 05

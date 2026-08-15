@@ -32,90 +32,142 @@ const inspirations = [
 
 export default function InspirationShowcase() {
   const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const activeNumberRef = useRef<HTMLSpanElement>(null);
+  const activeNameRef = useRef<HTMLSpanElement>(null);
+  const activeRoleRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
-    const title = titleRef.current;
     const cards = cardsRef.current;
+    const spotlight = spotlightRef.current;
+    const progress = progressRef.current;
+    const activeNumber = activeNumberRef.current;
+    const activeName = activeNameRef.current;
+    const activeRole = activeRoleRef.current;
 
-    if (!section || !title || cards.length !== inspirations.length) {
+    if (
+      !section ||
+      cards.length !== inspirations.length ||
+      !spotlight ||
+      !progress ||
+      !activeNumber ||
+      !activeName ||
+      !activeRole
+    ) {
       return;
     }
 
     const ctx = gsap.context(() => {
-      const mobile = window.innerWidth < 768;
-
-      const sideX = mobile ? 30 : 34;
-      const sideY = mobile ? 17 : 20;
+      const isMobile = window.innerWidth < 768;
 
       /*
-       * INITIAL CARD POSITIONS
+       * ---------------------------------------------------------
+       * LAYOUT POSITIONS
+       * ---------------------------------------------------------
        */
 
-      const initialPositions = [
-        {
-          x: -sideX,
-          y: -sideY,
-          rotate: -7,
-          scale: 0.76,
-        },
-        {
-          x: sideX,
-          y: -sideY,
-          rotate: 7,
-          scale: 0.72,
-        },
-        {
-          x: -sideX,
-          y: sideY,
-          rotate: 6,
-          scale: 0.7,
-        },
-        {
-          x: sideX,
-          y: sideY,
-          rotate: -6,
-          scale: 0.74,
-        },
-      ];
+      const sidePositions = isMobile
+        ? [
+            { x: -34, y: -18, rotate: -7, scale: 0.62 },
+            { x: 34, y: -18, rotate: 7, scale: 0.62 },
+            { x: -34, y: 23, rotate: 6, scale: 0.58 },
+            { x: 34, y: 23, rotate: -6, scale: 0.58 },
+          ]
+        : [
+            { x: -34, y: -17, rotate: -7, scale: 0.68 },
+            { x: 34, y: -17, rotate: 7, scale: 0.68 },
+            { x: -29, y: 20, rotate: 6, scale: 0.62 },
+            { x: 31, y: 20, rotate: -6, scale: 0.62 },
+          ];
+
+      /*
+       * ---------------------------------------------------------
+       * INITIAL STATE
+       * ---------------------------------------------------------
+       */
 
       cards.forEach((card, index) => {
-        const position = initialPositions[index];
+        const position = sidePositions[index];
 
-        gsap.set(card, {
-          xPercent: -50,
-          yPercent: -50,
-          x: `${position.x}vw`,
-          y: `${position.y}vh`,
-          rotate: position.rotate,
-          scale: position.scale,
-          opacity: 0.72,
-          zIndex: 20 + index,
-          transformOrigin: "center center",
-          willChange: "transform, opacity",
-        });
+        if (index === 0) {
+          gsap.set(card, {
+            xPercent: -50,
+            yPercent: -50,
+            x: 0,
+            y: 0,
+            rotate: 0,
+            scale: 1,
+            opacity: 1,
+            zIndex: 50,
+            filter: "brightness(1)",
+          });
+        } else {
+          gsap.set(card, {
+            xPercent: -50,
+            yPercent: -50,
+            x: `${position.x}vw`,
+            y: `${position.y}vh`,
+            rotate: position.rotate,
+            scale: position.scale,
+            opacity: 0.5,
+            zIndex: 20,
+            filter: "brightness(0.65)",
+          });
+        }
+      });
+
+      gsap.set(spotlight, {
+        scale: 0.75,
+        opacity: 0.35,
+      });
+
+      gsap.set(progress, {
+        width: "25%",
       });
 
       /*
-       * TITLE
+       * ---------------------------------------------------------
+       * HELPERS
+       * ---------------------------------------------------------
        */
 
-      gsap.set(title, {
-        y: 30,
-        opacity: 0,
-      });
+      const getSidePosition = (index: number, activeIndex: number) => {
+        const available = sidePositions.filter(
+          (_, positionIndex) => positionIndex !== activeIndex
+        );
+
+        const positionIndex =
+          (index > activeIndex ? index - 1 : index) % available.length;
+
+        return available[positionIndex];
+      };
+
+      const updateActiveText = (index: number) => {
+        if (!activeNumber || !activeName || !activeRole) return;
+
+        const item = inspirations[index];
+
+        activeNumber.textContent = String(index + 1).padStart(2, "0");
+        activeName.textContent = item.name;
+        activeRole.textContent = item.role;
+      };
+
+      updateActiveText(0);
 
       /*
-       * MASTER TIMELINE
+       * ---------------------------------------------------------
+       * MAIN TIMELINE
+       * ---------------------------------------------------------
        */
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: mobile ? "+=480%" : "+=560%",
+          end: isMobile ? "+=600%" : "+=700%",
           scrub: 1.15,
           pin: true,
           anticipatePin: 1,
@@ -124,132 +176,182 @@ export default function InspirationShowcase() {
       });
 
       /*
-       * 01 — TITLE ENTERS
+       * ---------------------------------------------------------
+       * INTRO
+       * ---------------------------------------------------------
        */
 
-      tl.to(
-        title,
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.7,
-          ease: "power3.out",
-        },
+      tl.fromTo(
+        spotlight,
+        { scale: 0.55, opacity: 0 },
+        { scale: 1, opacity: 0.38, duration: 0.8, ease: "power3.out" },
         0
       );
 
       /*
-       * 02 — CARDS SPREAD OUT
+       * ---------------------------------------------------------
+       * EACH PERSON BECOMES THE FEATURED CARD
+       * ---------------------------------------------------------
        */
 
-      cards.forEach((card, index) => {
-        const directionX = index % 2 === 0 ? -1 : 1;
-        const directionY = index < 2 ? -1 : 1;
+      for (let activeIndex = 0; activeIndex < inspirations.length; activeIndex++) {
+        const stepStart = activeIndex * 1.5;
+
+        tl.call(() => updateActiveText(activeIndex), [], stepStart);
+
+        const activeCard = cards[activeIndex];
 
         tl.to(
-          card,
+          activeCard,
           {
-            x: `${directionX * (mobile ? 40 : 45)}vw`,
-            y: `${directionY * (mobile ? 25 : 28)}vh`,
-            rotate: directionX * (index % 2 === 0 ? 13 : -13),
-            scale: 0.82,
-            opacity: 0.9,
-            duration: 1,
-            ease: "power2.inOut",
-          },
-          0.8
-        );
-      });
-
-      /*
-       * 03 — CARDS ORBIT
-       */
-
-      cards.forEach((card, index) => {
-        const angle =
-          (index / cards.length) * Math.PI * 2 - Math.PI / 2;
-
-        const radiusX = mobile ? 32 : 38;
-        const radiusY = mobile ? 25 : 27;
-
-        tl.to(
-          card,
-          {
-            x: `${Math.cos(angle) * radiusX}vw`,
-            y: `${Math.sin(angle) * radiusY}vh`,
-            rotate: index % 2 === 0 ? -10 : 10,
-            scale: 0.76,
-            opacity: 0.88,
-            duration: 1,
-            ease: "power2.inOut",
-          },
-          2
-        );
-      });
-
-      /*
-       * 04 — CARDS MOVE CLOSER
-       *
-       * One card becomes the visual focus.
-       */
-
-      cards.forEach((card, index) => {
-        const angle =
-          (index / cards.length) * Math.PI * 2 + Math.PI / 4;
-
-        tl.to(
-          card,
-          {
-            x: `${Math.cos(angle) * (mobile ? 25 : 29)}vw`,
-            y: `${Math.sin(angle) * (mobile ? 22 : 24)}vh`,
-            rotate: index === 0 ? 0 : index % 2 === 0 ? -5 : 5,
-            scale: index === 0 ? 1 : 0.62,
-            opacity: index === 0 ? 1 : 0.32,
-            zIndex: index === 0 ? 50 : 20,
+            x: 0,
+            y: 0,
+            rotate: 0,
+            scale: 1,
+            opacity: 1,
+            zIndex: 50,
+            filter: "brightness(1)",
             duration: 1,
             ease: "power3.inOut",
           },
-          3.2
+          stepStart
         );
-      });
+
+        const activeImage = activeCard.querySelector("[data-image]");
+
+        if (activeImage) {
+          tl.fromTo(
+            activeImage,
+            { scale: 1.08 },
+            { scale: 1, duration: 1.1, ease: "power2.out" },
+            stepStart
+          );
+        }
+
+        // --- INACTIVE CARDS: two-stage move (arc outward, then settle) ---
+        // instead of a single snap-to-position tween. This is what makes
+        // the transition itself read as physical motion.
+        cards.forEach((card, cardIndex) => {
+          if (cardIndex === activeIndex) return;
+
+          const position = getSidePosition(cardIndex, activeIndex);
+          const overshootSign = cardIndex % 2 === 0 ? 1 : -1;
+
+          tl.to(
+            card,
+            {
+              x: `${position.x + overshootSign * 3}vw`,
+              y: `${position.y - 4}vh`,
+              rotate: position.rotate + overshootSign * 6,
+              scale: position.scale + 0.05,
+              opacity: 0.65,
+              zIndex: 20,
+              filter: "brightness(0.7)",
+              duration: 0.55,
+              ease: "power2.out",
+            },
+            stepStart
+          ).to(
+            card,
+            {
+              x: `${position.x}vw`,
+              y: `${position.y}vh`,
+              rotate: position.rotate,
+              scale: position.scale,
+              opacity: 0.5,
+              filter: "brightness(0.62)",
+              duration: 0.55,
+              ease: "power2.inOut",
+            },
+            stepStart + 0.55
+          );
+        });
+
+        tl.to(
+          spotlight,
+          { scale: 1.08, opacity: 0.42, duration: 0.5, ease: "power2.out" },
+          stepStart + 0.25
+        );
+
+        tl.to(
+          spotlight,
+          { scale: 0.95, opacity: 0.32, duration: 0.7, ease: "power2.inOut" },
+          stepStart + 0.75
+        );
+
+        tl.to(
+          progress,
+          {
+            width: `${((activeIndex + 1) / inspirations.length) * 100}%`,
+            duration: 1,
+            ease: "power2.inOut",
+          },
+          stepStart
+        );
+
+        // --- IDLE "BREATHE" DURING THE PAUSE ---
+        // Replaces the old empty spacer tween with a subtle scale/rotate
+        // pulse on every inactive card — still fully scroll-driven (no
+        // repeat: -1, no independent loop), just placed later in the
+        // same timeline so it stays in sync with scrub.
+        if (activeIndex < inspirations.length - 1) {
+          cards.forEach((card, cardIndex) => {
+            if (cardIndex === activeIndex) return;
+            const drift = cardIndex % 2 === 0 ? 1 : -1;
+
+            tl.to(
+              card,
+              {
+                rotate: `+=${drift * 3}`,
+                scale: "+=0.03",
+                duration: 0.25,
+                ease: "sine.inOut",
+              },
+              stepStart + 1
+            ).to(
+              card,
+              {
+                rotate: `-=${drift * 3}`,
+                scale: "-=0.03",
+                duration: 0.25,
+                ease: "sine.inOut",
+              },
+              stepStart + 1.25
+            );
+          });
+        }
+      }
 
       /*
-       * 05 — FINAL SCATTER
-       *
-       * Cards leave the viewport in different directions.
+       * ---------------------------------------------------------
+       * FINAL EXIT
+       * ---------------------------------------------------------
        */
 
+      const exitStart = inspirations.length * 1.5;
+
       cards.forEach((card, index) => {
-        const direction = index % 2 === 0 ? 1 : -1;
+        const direction = index % 2 === 0 ? -1 : 1;
 
         tl.to(
           card,
           {
-            x: `${direction * (mobile ? 58 : 70)}vw`,
-            y: `${index % 2 === 0 ? -50 : 50}vh`,
-            rotate: direction * 22,
+            x: `${direction * 55}vw`,
+            y: `${index % 2 === 0 ? -38 : 38}vh`,
+            rotate: direction * 18,
             scale: 0.42,
             opacity: 0,
             duration: 1,
             ease: "power3.in",
           },
-          4.5
+          exitStart
         );
       });
 
-      /*
-       * TITLE EXITS SLIGHTLY BEFORE THE CARDS
-       */
-
       tl.to(
-        title,
-        {
-          y: -40,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.in",
-        },
-        4.35
+        spotlight,
+        { scale: 1.5, opacity: 0, duration: 1, ease: "power3.in" },
+        exitStart
       );
     }, section);
 
@@ -262,156 +364,255 @@ export default function InspirationShowcase() {
       id="inspiration"
       className="
         relative
-        h-[100svh]
+        h-screen
         w-full
         overflow-hidden
         bg-[#151515]
         text-[#F3F3EE]
       "
     >
-      {/* --------------------------------
+      {/* =====================================================
           BACKGROUND
-      -------------------------------- */}
+      ====================================================== */}
 
       <div className="pointer-events-none absolute inset-0">
         <div
+          ref={spotlightRef}
           className="
             absolute
             left-1/2
             top-1/2
-            h-[60vw]
-            w-[60vw]
+            h-[42vw]
+            w-[42vw]
             -translate-x-1/2
             -translate-y-1/2
             rounded-full
+            bg-white/[0.035]
+            blur-[100px]
+          "
+        />
+
+        <div
+          className="
+            absolute
+            left-1/2
+            top-[-25%]
+            h-[55vw]
+            w-[55vw]
+            -translate-x-1/2
+            rounded-full
             bg-white/[0.018]
-            blur-3xl
+            blur-[100px]
           "
         />
 
         <svg
-          className="
-            absolute
-            inset-0
-            h-full
-            w-full
-            opacity-[0.045]
-          "
+          className="absolute inset-0 h-full w-full opacity-[0.07]"
           viewBox="0 0 1440 900"
           preserveAspectRatio="none"
         >
           <path
-            d="M-100 450 C250 100 500 800 850 400 S1200 150 1550 450"
+            d="M-100 450 C200 180 470 730 760 420 S1200 120 1540 420"
             fill="none"
             stroke="currentColor"
+            strokeWidth="1"
           />
-
           <path
-            d="M-100 500 C250 150 500 850 850 450 S1200 200 1550 500"
+            d="M-100 500 C200 230 470 780 760 470 S1200 170 1540 470"
             fill="none"
             stroke="currentColor"
+            strokeWidth="1"
+          />
+          <path
+            d="M-100 550 C200 280 470 830 760 520 S1200 220 1540 520"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
           />
         </svg>
+
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E\")",
+          }}
+        />
       </div>
 
-      {/* --------------------------------
-          TITLE
-      -------------------------------- */}
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
 
       <div
-        ref={titleRef}
         className="
+          pointer-events-none
           absolute
           left-6
           top-8
           z-[100]
           md:left-10
-          md:top-9
+          md:top-10
         "
       >
-        <div className="flex items-center gap-3">
-          <span className="h-px w-7 bg-white/25" />
-
-          <span
-            className="
-              text-[9px]
-              uppercase
-              tracking-[0.3em]
-              text-white/45
-              md:text-[10px]
-            "
-          >
-            Inspiration
-          </span>
-        </div>
-
         <h2
           className="
-            mt-4
             font-display
-            text-[clamp(3rem,6vw,6rem)]
+            text-[clamp(3.2rem,6vw,6rem)]
             uppercase
             leading-[0.82]
             tracking-[-0.045em]
+            text-white
           "
         >
-          People
+          Inspiration
         </h2>
       </div>
 
-      {/* --------------------------------
+      {/* =====================================================
+          CENTER FEATURE INFORMATION
+      ====================================================== */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          bottom-9
+          left-6
+          z-[100]
+          flex
+          items-end
+          gap-4
+          md:left-10
+        "
+      >
+        <span
+          ref={activeNumberRef}
+          className="font-mono text-[10px] tracking-[0.18em] text-white/35"
+        >
+          01
+        </span>
+
+        <div className="h-7 w-px bg-white/15" />
+
+        <div className="flex flex-col">
+          <span
+            ref={activeNameRef}
+            className="text-[11px] uppercase tracking-[0.2em] text-white/80"
+          >
+            Lionel Messi
+          </span>
+
+          <span
+            ref={activeRoleRef}
+            className="mt-1 text-[8px] uppercase tracking-[0.25em] text-white/30"
+          >
+            Discipline
+          </span>
+        </div>
+      </div>
+
+      {/* =====================================================
+          PROGRESS
+      ====================================================== */}
+
+      <div
+        className="
+          absolute
+          bottom-10
+          right-6
+          z-[100]
+          w-[100px]
+          md:right-10
+          md:w-[140px]
+        "
+      >
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[8px] uppercase tracking-[0.2em] text-white/25">
+            People
+          </span>
+
+          <span className="font-mono text-[8px] tracking-[0.15em] text-white/25">
+            04
+          </span>
+        </div>
+
+        <div className="relative h-px w-full bg-white/10">
+          <div
+            ref={progressRef}
+            className="absolute left-0 top-0 h-px bg-white/70"
+          />
+        </div>
+      </div>
+
+      {/* =====================================================
           CARDS
-      -------------------------------- */}
+      ====================================================== */}
 
       <div className="relative z-20 h-full w-full">
         {inspirations.map((person, index) => (
           <div
             key={person.name}
             ref={(el) => {
-              if (el) {
-                cardsRef.current[index] = el;
-              }
+              if (el) cardsRef.current[index] = el;
             }}
             className="
               absolute
               left-1/2
               top-1/2
-              w-[clamp(145px,17vw,255px)]
+              w-[clamp(170px,20vw,290px)]
               will-change-transform
             "
           >
             <div className="relative">
-              {/* IMAGE */}
-
               <div
                 className="
                   relative
                   aspect-[3/4]
-                  w-full
                   overflow-hidden
-                  bg-white/[0.04]
+                  bg-[#242424]
+                  shadow-[0_30px_80px_rgba(0,0,0,0.3)]
                 "
               >
                 <Image
+                  data-image
                   src={person.image}
                   alt={person.name}
                   fill
-                  className="
-                    object-cover
-                    transition-transform
-                    duration-700
-                    ease-out
-                    hover:scale-[1.025]
-                  "
-                  sizes="(max-width: 768px) 35vw, 18vw"
+                  priority={index === 0}
+                  className="object-cover will-change-transform"
+                  sizes="(max-width: 768px) 42vw, 22vw"
                 />
-              </div>
 
-              {/* CARD INFO */}
+                <div
+                  className="
+                    absolute
+                    inset-0
+                    bg-gradient-to-t
+                    from-black/30
+                    via-transparent
+                    to-black/10
+                  "
+                />
+
+                <span
+                  className="
+                    absolute
+                    left-3
+                    top-3
+                    font-mono
+                    text-[8px]
+                    tracking-[0.15em]
+                    text-white/60
+                  "
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
 
               <div
                 className="
-                  mt-2
+                  mt-3
                   flex
                   items-center
                   justify-between
@@ -420,82 +621,37 @@ export default function InspirationShowcase() {
                   pt-2
                 "
               >
-                <p
-                  className="
-                    text-[8px]
-                    font-medium
-                    uppercase
-                    tracking-[0.18em]
-                    text-white/65
-                  "
-                >
+                <span className="text-[8px] uppercase tracking-[0.18em] text-white/65">
                   {person.name}
-                </p>
+                </span>
 
-                <p
-                  className="
-                    text-[7px]
-                    uppercase
-                    tracking-[0.18em]
-                    text-white/25
-                  "
-                >
+                <span className="text-[7px] uppercase tracking-[0.18em] text-white/25">
                   {person.role}
-                </p>
+                </span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* --------------------------------
-          FOOTER META
-      -------------------------------- */}
+      {/* =====================================================
+          SMALL TOP RIGHT INDEX
+      ====================================================== */}
 
       <div
         className="
           absolute
-          bottom-7
-          left-6
-          z-[100]
-          md:bottom-8
-          md:left-10
-        "
-      >
-        <p
-          className="
-            text-[8px]
-            uppercase
-            tracking-[0.25em]
-            text-white/25
-            md:text-[9px]
-          "
-        >
-          People · Ideas · Energy
-        </p>
-      </div>
-
-      <div
-        className="
-          absolute
-          bottom-7
           right-6
+          top-9
           z-[100]
-          md:bottom-8
+          font-mono
+          text-[8px]
+          tracking-[0.2em]
+          text-white/20
           md:right-10
         "
       >
-        <p
-          className="
-            text-[8px]
-            uppercase
-            tracking-[0.22em]
-            text-white/25
-            md:text-[9px]
-          "
-        >
-          Scroll →
-        </p>
+        04 PEOPLE
       </div>
     </section>
   );
