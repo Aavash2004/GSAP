@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #111112;
+  --color-accent: #d2ff00;
+  --color-muted: #8a8a8a;
+  --color-border: #e5e5e5;
+
+  --font-display: "Archivo Black", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mona: "Hanken Grotesk", Arial, sans-serif;
+
+ --animate-aurora-1: aurora-move-1 12s ease-in-out infinite;
+  --animate-aurora-2: aurora-move-2 15s ease-in-out infinite;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-beam-1: beam-move 6s ease-in-out infinite;
+  --animate-beam-2: beam-move 8s ease-in-out infinite;
+}
+
+@keyframes aurora-move-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10%, 10%) scale(1.1); }
+}
+
+@keyframes aurora-move-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10%, -10%) scale(1.15); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-20px); opacity: 1; }
+}
+
+@keyframes beam-move {
+  0%, 100% { opacity: 0.2; transform: translateX(0); }
+  50% { opacity: 0.6; transform: translateX(20px); }
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+html, body {
+  overflow-x: hidden;
+}
