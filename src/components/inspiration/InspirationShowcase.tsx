@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import WebGLImage from "@/components/webgl/WebGLImage";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -63,7 +62,6 @@ export default function InspirationShowcase() {
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768;
 
-      /* Layout positions */
       const sidePositions = isMobile
         ? [
             { x: -34, y: -18, rotate: -7, scale: 0.62 },
@@ -78,7 +76,7 @@ export default function InspirationShowcase() {
             { x: 31, y: 20, rotate: -6, scale: 0.62 },
           ];
 
-      /* Initial state */
+      /* Initial card positions */
       cards.forEach((card, index) => {
         const position = sidePositions[index];
 
@@ -118,7 +116,10 @@ export default function InspirationShowcase() {
         width: "25%",
       });
 
-      const getSidePosition = (index: number, activeIndex: number) => {
+      const getSidePosition = (
+        index: number,
+        activeIndex: number
+      ) => {
         const available = sidePositions.filter(
           (_, positionIndex) => positionIndex !== activeIndex
         );
@@ -130,8 +131,6 @@ export default function InspirationShowcase() {
       };
 
       const updateActiveText = (index: number) => {
-        if (!activeNumber || !activeName || !activeRole) return;
-
         const item = inspirations[index];
 
         activeNumber.textContent = String(index + 1).padStart(2, "0");
@@ -141,7 +140,7 @@ export default function InspirationShowcase() {
 
       updateActiveText(0);
 
-      /* Main timeline */
+      /* Main scroll timeline */
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -154,20 +153,38 @@ export default function InspirationShowcase() {
         },
       });
 
+      /* Spotlight */
       tl.fromTo(
         spotlight,
-        { scale: 0.55, opacity: 0 },
-        { scale: 1, opacity: 0.45, duration: 0.8, ease: "power3.out" },
+        {
+          scale: 0.55,
+          opacity: 0,
+        },
+        {
+          scale: 1,
+          opacity: 0.45,
+          duration: 0.8,
+          ease: "power3.out",
+        },
         0
       );
 
-      for (let activeIndex = 0; activeIndex < inspirations.length; activeIndex++) {
+      /* Each inspiration */
+      for (
+        let activeIndex = 0;
+        activeIndex < inspirations.length;
+        activeIndex++
+      ) {
         const stepStart = activeIndex * 1.5;
-
-        tl.call(() => updateActiveText(activeIndex), [], stepStart);
-
         const activeCard = cards[activeIndex];
 
+        tl.call(
+          () => updateActiveText(activeIndex),
+          [],
+          stepStart
+        );
+
+        /* Bring active card forward */
         tl.to(
           activeCard,
           {
@@ -184,29 +201,25 @@ export default function InspirationShowcase() {
           stepStart
         );
 
-        const activeImage = activeCard.querySelector("[data-image]");
-
-        if (activeImage) {
-          tl.fromTo(
-            activeImage,
-            { scale: 1.08 },
-            { scale: 1, duration: 1.1, ease: "power2.out" },
-            stepStart
-          );
-        }
-
+        /* Move other cards */
         cards.forEach((card, cardIndex) => {
           if (cardIndex === activeIndex) return;
 
-          const position = getSidePosition(cardIndex, activeIndex);
-          const overshootSign = cardIndex % 2 === 0 ? 1 : -1;
+          const position = getSidePosition(
+            cardIndex,
+            activeIndex
+          );
+
+          const overshootSign =
+            cardIndex % 2 === 0 ? 1 : -1;
 
           tl.to(
             card,
             {
               x: `${position.x + overshootSign * 3}vw`,
               y: `${position.y - 4}vh`,
-              rotate: position.rotate + overshootSign * 6,
+              rotate:
+                position.rotate + overshootSign * 6,
               scale: position.scale + 0.05,
               opacity: 0.65,
               zIndex: 20,
@@ -215,7 +228,9 @@ export default function InspirationShowcase() {
               ease: "power2.out",
             },
             stepStart
-          ).to(
+          );
+
+          tl.to(
             card,
             {
               x: `${position.x}vw`,
@@ -231,32 +246,51 @@ export default function InspirationShowcase() {
           );
         });
 
+        /* Spotlight movement */
         tl.to(
           spotlight,
-          { scale: 1.08, opacity: 0.5, duration: 0.5, ease: "power2.out" },
+          {
+            scale: 1.08,
+            opacity: 0.5,
+            duration: 0.5,
+            ease: "power2.out",
+          },
           stepStart + 0.25
         );
 
         tl.to(
           spotlight,
-          { scale: 0.95, opacity: 0.35, duration: 0.7, ease: "power2.inOut" },
+          {
+            scale: 0.95,
+            opacity: 0.35,
+            duration: 0.7,
+            ease: "power2.inOut",
+          },
           stepStart + 0.75
         );
 
+        /* Progress */
         tl.to(
           progress,
           {
-            width: `${((activeIndex + 1) / inspirations.length) * 100}%`,
+            width: `${
+              ((activeIndex + 1) /
+                inspirations.length) *
+              100
+            }%`,
             duration: 1,
             ease: "power2.inOut",
           },
           stepStart
         );
 
+        /* Small floating movement */
         if (activeIndex < inspirations.length - 1) {
           cards.forEach((card, cardIndex) => {
             if (cardIndex === activeIndex) return;
-            const drift = cardIndex % 2 === 0 ? 1 : -1;
+
+            const drift =
+              cardIndex % 2 === 0 ? 1 : -1;
 
             tl.to(
               card,
@@ -267,7 +301,9 @@ export default function InspirationShowcase() {
                 ease: "sine.inOut",
               },
               stepStart + 1
-            ).to(
+            );
+
+            tl.to(
               card,
               {
                 rotate: `-=${drift * 3}`,
@@ -281,16 +317,21 @@ export default function InspirationShowcase() {
         }
       }
 
-      const exitStart = inspirations.length * 1.5;
+      /* Exit animation */
+      const exitStart =
+        inspirations.length * 1.5;
 
       cards.forEach((card, index) => {
-        const direction = index % 2 === 0 ? -1 : 1;
+        const direction =
+          index % 2 === 0 ? -1 : 1;
 
         tl.to(
           card,
           {
             x: `${direction * 55}vw`,
-            y: `${index % 2 === 0 ? -38 : 38}vh`,
+            y: `${
+              index % 2 === 0 ? -38 : 38
+            }vh`,
             rotate: direction * 18,
             scale: 0.42,
             opacity: 0,
@@ -303,7 +344,12 @@ export default function InspirationShowcase() {
 
       tl.to(
         spotlight,
-        { scale: 1.5, opacity: 0, duration: 1, ease: "power3.in" },
+        {
+          scale: 1.5,
+          opacity: 0,
+          duration: 1,
+          ease: "power3.in",
+        },
         exitStart
       );
     }, section);
@@ -324,7 +370,7 @@ export default function InspirationShowcase() {
         text-[#111111]
       "
     >
-      {/* Background Soft Light & Contour Lines */}
+      {/* Background */}
       <div className="pointer-events-none absolute inset-0">
         <div
           ref={spotlightRef}
@@ -346,6 +392,7 @@ export default function InspirationShowcase() {
           className="absolute inset-0 h-full w-full opacity-25"
           viewBox="0 0 1440 900"
           preserveAspectRatio="none"
+          aria-hidden="true"
         >
           <path
             d="M-100 450 C200 180 470 730 760 420 S1200 120 1540 420"
@@ -353,12 +400,14 @@ export default function InspirationShowcase() {
             stroke="#a8a8a0"
             strokeWidth="0.8"
           />
+
           <path
             d="M-100 500 C200 230 470 780 760 470 S1200 170 1540 470"
             fill="none"
             stroke="#a8a8a0"
             strokeWidth="0.8"
           />
+
           <path
             d="M-100 550 C200 280 470 830 760 520 S1200 220 1540 520"
             fill="none"
@@ -383,6 +432,7 @@ export default function InspirationShowcase() {
         <p className="mb-1 text-[9px] font-mono font-medium uppercase tracking-[0.3em] text-black/40">
           Inspiration
         </p>
+
         <h2
           className="
             font-display
@@ -397,7 +447,7 @@ export default function InspirationShowcase() {
         </h2>
       </div>
 
-      {/* Center Feature Information */}
+      {/* Active Information */}
       <div
         className="
           pointer-events-none
@@ -437,7 +487,7 @@ export default function InspirationShowcase() {
         </div>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress */}
       <div
         className="
           absolute
@@ -473,7 +523,9 @@ export default function InspirationShowcase() {
           <div
             key={person.name}
             ref={(el) => {
-              if (el) cardsRef.current[index] = el;
+              if (el) {
+                cardsRef.current[index] = el;
+              }
             }}
             data-cursor="view"
             className="
@@ -495,14 +547,11 @@ export default function InspirationShowcase() {
                   shadow-[0_20px_50px_rgba(0,0,0,0.09)]
                 "
               >
-                <WebGLImage
+                <img
                   src={person.image}
                   alt={person.name}
-                  fill
-                  priority={index === 0}
-                  intensity={0.07}
-                  sizes="(max-width: 768px) 42vw, 22vw"
-                  className="h-full w-full"
+                  className="h-full w-full object-cover"
+                  draggable={false}
                 />
 
                 <div
@@ -543,11 +592,28 @@ export default function InspirationShowcase() {
                   pt-2
                 "
               >
-                <span className="text-[8px] font-mono font-bold uppercase tracking-[0.18em] text-black/75">
+                <span
+                  className="
+                    text-[8px]
+                    font-mono
+                    font-bold
+                    uppercase
+                    tracking-[0.18em]
+                    text-black/75
+                  "
+                >
                   {person.name}
                 </span>
 
-                <span className="text-[7px] font-mono uppercase tracking-[0.18em] text-black/40">
+                <span
+                  className="
+                    text-[7px]
+                    font-mono
+                    uppercase
+                    tracking-[0.18em]
+                    text-black/40
+                  "
+                >
                   {person.role}
                 </span>
               </div>

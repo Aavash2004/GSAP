@@ -332,7 +332,7 @@ export default function ProjectShowcase() {
                   transition-transform
                   duration-700
                   ease-out
-                  group-hover:scale-[1.025]
+                 
                 "
                 sizes="(max-width: 768px) 72vw, 38vw"
               />
@@ -481,9 +481,6 @@ export default function ProjectShowcase() {
                   text-black/65
                   transition-all
                   duration-300
-                  hover:border-black/60
-                  hover:text-black
-
                   md:text-[9px]
                 "
               >
@@ -491,9 +488,8 @@ export default function ProjectShowcase() {
 
                 <span
                   className="
-                    transition-transform
                     duration-300
-                    group-hover/link:translate-x-1
+                   
                   "
                 >
                   ↗

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Archivo_Black, Inter, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/shared/SmoothScroll";
-import CustomCursor from "@/components/shared/CustomCursor";
+
 import PageTransition from "@/components/transitions/PageTransition";
 
 const hankenGrotesk = Hanken_Grotesk({
@@ -59,7 +59,7 @@ export default function RootLayout({
       >
         <SmoothScroll>
           <PageTransition>
-            <CustomCursor />
+         
             {children}
           </PageTransition>
         </SmoothScroll>

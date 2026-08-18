@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import WebGLImage from "@/components/webgl/WebGLImage";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Project } from "@/types/portfolio";
@@ -68,57 +68,84 @@ export default function ProjectShowcase() {
         return Math.max(0, track.scrollWidth - window.innerWidth);
       };
 
-      /* Initial States */
+      /*
+       * Initial section setup
+       */
       gsap.set(section, {
         transformOrigin: "50% 0%",
         transformStyle: "preserve-3d",
       });
 
-      // Prepare images and text initial states for active scene transitions
-      imageRefs.current.forEach((img, idx) => {
-        if (!img) return;
-        gsap.set(img, {
-          scale: idx === 0 ? 1 : 0.94,
+      /*
+       * Initial image states
+       */
+      imageRefs.current.forEach((image, index) => {
+        if (!image) return;
+
+        gsap.set(image, {
+          scale: index === 0 ? 1 : 0.94,
           transformOrigin: "center center",
         });
       });
 
-      textRefs.current.forEach((text, idx) => {
+      /*
+       * Initial text states
+       */
+      textRefs.current.forEach((text, index) => {
         if (!text) return;
+
         gsap.set(text, {
-          opacity: idx === 0 ? 1 : 0.4,
-          y: idx === 0 ? 0 : 20,
+          opacity: index === 0 ? 1 : 0.4,
+          y: index === 0 ? 0 : 20,
         });
       });
 
-      /* Main Horizontal Scroll Timeline */
+      /*
+       * Main horizontal scroll
+       */
       const mainTimeline = gsap.timeline({
-        defaults: { ease: "none" },
+        defaults: {
+          ease: "none",
+        },
+
         scrollTrigger: {
           trigger: section,
           start: "top top",
+
           end: () => `+=${getHorizontalDistance()}`,
+
           pin: true,
           scrub: 1,
           anticipatePin: 1,
+
           invalidateOnRefresh: true,
+
           onUpdate: (self) => {
-            // Update horizontal progress bar indicator
+            /*
+             * Progress bar
+             */
             if (progressBarRef.current) {
-              gsap.set(progressBarRef.current, { scaleX: self.progress });
+              gsap.set(progressBarRef.current, {
+                scaleX: self.progress,
+              });
             }
 
-            // Calculate active project index dynamically based on scroll ratio
+            /*
+             * Active project
+             */
             const newIndex = Math.min(
               projects.length - 1,
               Math.floor(self.progress * projects.length)
             );
+
             setActiveIndex(newIndex);
           },
         },
       });
 
-      /* 1. Track Horizontal Movement */
+      /*
+       * Horizontal track movement
+       */
       mainTimeline.to(
         track,
         {
@@ -128,59 +155,95 @@ export default function ProjectShowcase() {
         0
       );
 
-      /* 2. Parallax & Scale Transitions for Project Cards */
-      projects.forEach((_, idx) => {
-        const img = imageRefs.current[idx];
-        const text = textRefs.current[idx];
+      /*
+       * Individual project animations
+       */
+      projects.forEach((_, index) => {
+        const card = cardRefs.current[index];
+        const imageContainer = imageRefs.current[index];
+        const text = textRefs.current[index];
 
-        if (img) {
-          // Subtle inner image parallax inside card container
-          gsap.to(img.querySelector("img"), {
-            xPercent: -12,
-            ease: "none",
-            scrollTrigger: {
-              trigger: cardRefs.current[idx],
-              containerAnimation: mainTimeline,
-              start: "left right",
-              end: "right left",
-              scrub: true,
-            },
-          });
+        if (!card) return;
 
-          // Focus scaling when card reaches center
+        /*
+         * Image parallax
+         */
+        if (imageContainer) {
+          const image = imageContainer.querySelector("img");
+
+          if (image) {
+            gsap.to(image, {
+              xPercent: -10,
+
+              ease: "none",
+
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: mainTimeline,
+
+                start: "left right",
+                end: "right left",
+
+                scrub: true,
+              },
+            });
+          }
+
+          /*
+           * Image focus animation
+           */
           gsap.fromTo(
-            img,
-            { scale: 0.94 },
+            imageContainer,
+            {
+              scale: 0.94,
+            },
             {
               scale: 1,
+
               duration: 0.5,
+
               ease: "power2.out",
+
               scrollTrigger: {
-                trigger: cardRefs.current[idx],
+                trigger: card,
+
                 containerAnimation: mainTimeline,
+
                 start: "left 70%",
                 end: "center center",
+
                 toggleActions: "play reverse play reverse",
               },
             }
           );
         }
 
+        /*
+         * Text entrance
+         */
         if (text) {
-          // Independent text entrance animation
           gsap.fromTo(
             text,
-            { opacity: 0.3, y: 30 },
+            {
+              opacity: 0.3,
+              y: 30,
+            },
             {
               opacity: 1,
               y: 0,
+
               duration: 0.5,
+
               ease: "power2.out",
+
               scrollTrigger: {
-                trigger: cardRefs.current[idx],
+                trigger: card,
+
                 containerAnimation: mainTimeline,
+
                 start: "left 75%",
                 end: "center center",
+
                 toggleActions: "play reverse play reverse",
               },
             }
@@ -188,7 +251,9 @@ export default function ProjectShowcase() {
         }
       });
 
-      /* 3. Subtle Background Movement */
+      /*
+       * Background movement
+       */
       if (background) {
         mainTimeline.to(
           background,
@@ -219,50 +284,153 @@ export default function ProjectShowcase() {
         text-[#111111]
       "
     >
-      {/* Dynamic Background Grid & Contour Lines */}
+      {/* =====================================================
+          BACKGROUND
+      ====================================================== */}
+
       <div
         ref={backgroundRef}
-        className="pointer-events-none absolute inset-0 will-change-transform"
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          will-change-transform
+        "
       >
-        <div className="absolute left-[15%] top-[10%] h-[55vh] w-[55vh] rounded-full bg-white/40 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] h-[60vh] w-[60vh] rounded-full bg-[#D8D8D2]/40 blur-[130px]" />
+        {/* Soft light */}
+        <div
+          className="
+            absolute
+            left-[15%]
+            top-[10%]
+            h-[55vh]
+            w-[55vh]
+            rounded-full
+            bg-white/40
+            blur-[120px]
+          "
+        />
 
+        {/* Bottom light */}
+        <div
+          className="
+            absolute
+            bottom-[-10%]
+            right-[-5%]
+            h-[60vh]
+            w-[60vh]
+            rounded-full
+            bg-[#D8D8D2]/40
+            blur-[130px]
+          "
+        />
+
+        {/* Contour lines */}
         <svg
-          className="absolute inset-0 h-full w-full opacity-20"
+          className="
+            absolute
+            inset-0
+            h-full
+            w-full
+            opacity-20
+          "
           viewBox="0 0 1600 900"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <g fill="none" stroke="#b0b0a8" strokeWidth="0.8">
+          <g
+            fill="none"
+            stroke="#b0b0a8"
+            strokeWidth="0.8"
+          >
             <path d="M-100 520 C180 280 390 720 680 410 S1100 130 1710 390" />
+
             <path d="M-100 570 C180 330 390 770 680 460 S1100 180 1710 440" />
+
             <path d="M-100 620 C180 380 390 820 680 510 S1100 230 1710 490" />
           </g>
         </svg>
       </div>
 
-      {/* Section Header */}
-      <header className="pointer-events-none absolute left-6 top-20 z-[100] md:left-12 md:top-24">
+      {/* =====================================================
+          SECTION HEADER
+      ====================================================== */}
+
+      <header
+        className="
+          pointer-events-none
+          absolute
+          left-6
+          top-20
+          z-[100]
+          md:left-12
+          md:top-24
+        "
+      >
         <div className="mb-2 flex items-center gap-3">
-          <span className="text-[9px] font-mono font-medium uppercase tracking-[0.3em] text-black/40">
+          <span
+            className="
+              text-[9px]
+              font-mono
+              font-medium
+              uppercase
+              tracking-[0.3em]
+              text-black/40
+            "
+          >
             02 / Selected Work
           </span>
+
           <span className="h-px w-8 bg-black/20" />
         </div>
-        <h2 className="font-display text-[clamp(2.5rem,4.5vw,4.5rem)] font-extrabold uppercase leading-none tracking-tight">
+
+        <h2
+          className="
+            font-display
+            text-[clamp(2.5rem,4.5vw,4.5rem)]
+            font-extrabold
+            uppercase
+            leading-none
+            tracking-tight
+          "
+        >
           Projects
         </h2>
       </header>
 
-      {/* Progress Bar Indicator at Top */}
-      <div className="absolute left-6 right-6 top-16 z-[100] h-[2px] bg-black/10 md:left-12 md:right-12">
+      {/* =====================================================
+          TOP PROGRESS BAR
+      ====================================================== */}
+
+      <div
+        className="
+          absolute
+          left-6
+          right-6
+          top-16
+          z-[100]
+          h-[2px]
+          bg-black/10
+          md:left-12
+          md:right-12
+        "
+      >
         <div
           ref={progressBarRef}
-          className="h-full w-full origin-left bg-black/80 scale-x-0 transition-transform duration-75"
+          className="
+            h-full
+            w-full
+            origin-left
+            scale-x-0
+            bg-black/80
+          "
         />
       </div>
 
-      {/* Horizontal Project Showcase Track */}
+      {/* =====================================================
+          HORIZONTAL PROJECT TRACK
+      ====================================================== */}
+
       <div
         ref={trackRef}
         className="
@@ -300,12 +468,14 @@ export default function ProjectShowcase() {
                 lg:w-[65vw]
               "
             >
-              {/* Project Image Container */}
+              {/* =================================================
+                  PROJECT IMAGE
+              ================================================== */}
+
               <div
                 ref={(el) => {
                   imageRefs.current[index] = el;
                 }}
-                data-cursor="view"
                 className={`
                   group
                   relative
@@ -318,61 +488,178 @@ export default function ProjectShowcase() {
                   transition-shadow
                   duration-500
                   md:h-[40vh]
-                  ${isActive ? "shadow-[0_30px_70px_rgba(0,0,0,0.15)]" : ""}
+                  ${
+                    isActive
+                      ? "shadow-[0_30px_70px_rgba(0,0,0,0.15)]"
+                      : ""
+                  }
                 `}
               >
-                <WebGLImage
+                {/* Normal Next.js Image */}
+                <Image
                   src={project.image}
                   alt={project.title}
                   fill
                   priority={index === 0}
-                  intensity={0.06}
                   sizes="(max-width: 768px) 82vw, 42vw"
-                  className="h-full w-full"
+                  className="
+                    object-cover
+                    transition-transform
+                    duration-700
+                    ease-out
+                    group-hover:scale-[1.03]
+                  "
                 />
 
-                <div className="pointer-events-none absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                {/* Hover overlay */}
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    bg-black/5
+                    opacity-0
+                    transition-opacity
+                    duration-300
+                    group-hover:opacity-100
+                  "
+                />
 
-                <div className="pointer-events-none absolute left-4 top-4 z-20 rounded bg-black/60 px-2.5 py-1 text-[8px] font-mono tracking-[0.2em] text-white/90 backdrop-blur-xs">
+                {/* Project number */}
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    left-4
+                    top-4
+                    z-20
+                    rounded
+                    bg-black/60
+                    px-2.5
+                    py-1
+                    text-[8px]
+                    font-mono
+                    tracking-[0.2em]
+                    text-white/90
+                    backdrop-blur-xs
+                  "
+                >
                   {project.number} / 03
                 </div>
 
+                {/* Category */}
                 {project.category && (
-                  <div className="pointer-events-none absolute right-4 top-4 z-20 rounded border border-white/20 bg-black/40 px-2.5 py-1 text-[8px] font-mono tracking-[0.18em] text-white/80 backdrop-blur-xs">
+                  <div
+                    className="
+                      pointer-events-none
+                      absolute
+                      right-4
+                      top-4
+                      z-20
+                      rounded
+                      border
+                      border-white/20
+                      bg-black/40
+                      px-2.5
+                      py-1
+                      text-[8px]
+                      font-mono
+                      tracking-[0.18em]
+                      text-white/80
+                      backdrop-blur-xs
+                    "
+                  >
                     {project.category}
                   </div>
                 )}
               </div>
 
-              {/* Project Information */}
+              {/* =================================================
+                  PROJECT INFORMATION
+              ================================================== */}
+
               <div
                 ref={(el) => {
                   textRefs.current[index] = el;
                 }}
-                className="flex flex-col justify-center px-2"
+                className="
+                  flex
+                  flex-col
+                  justify-center
+                  px-2
+                "
               >
+                {/* Project metadata */}
                 <div className="mb-3 flex items-center gap-3">
-                  <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-black/40">
+                  <span
+                    className="
+                      text-[9px]
+                      font-mono
+                      uppercase
+                      tracking-[0.25em]
+                      text-black/40
+                    "
+                  >
                     Project {project.number}
                   </span>
+
                   <span className="h-px w-6 bg-black/15" />
-                  <span className="text-[9px] font-mono tracking-[0.2em] text-black/40">
+
+                  <span
+                    className="
+                      text-[9px]
+                      font-mono
+                      tracking-[0.2em]
+                      text-black/40
+                    "
+                  >
                     {project.year}
                   </span>
                 </div>
 
-                <h3 className="font-display text-[clamp(1.8rem,3vw,3.2rem)] font-bold uppercase leading-[0.88] tracking-tight">
+                {/* Title */}
+                <h3
+                  className="
+                    font-display
+                    text-[clamp(1.8rem,3vw,3.2rem)]
+                    font-bold
+                    uppercase
+                    leading-[0.88]
+                    tracking-tight
+                  "
+                >
                   {project.title}
                 </h3>
 
-                <p className="mt-4 max-w-[340px] text-xs leading-relaxed text-black/60 md:text-sm">
+                {/* Description */}
+                <p
+                  className="
+                    mt-4
+                    max-w-[340px]
+                    text-xs
+                    leading-relaxed
+                    text-black/60
+                    md:text-sm
+                  "
+                >
                   {project.description}
                 </p>
 
-                <p className="mt-4 text-[8px] font-mono uppercase tracking-[0.22em] text-black/40">
+                {/* Technologies */}
+                <p
+                  className="
+                    mt-4
+                    text-[8px]
+                    font-mono
+                    uppercase
+                    tracking-[0.22em]
+                    text-black/40
+                  "
+                >
                   {project.tech}
                 </p>
 
+                {/* View Project */}
                 <a
                   href={project.url}
                   target="_blank"
@@ -401,7 +688,15 @@ export default function ProjectShowcase() {
                   "
                 >
                   <span>View Project</span>
-                  <span className="transition-transform duration-300 group-hover/link:translate-x-1 group-hover/link:-translate-y-0.5">
+
+                  <span
+                    className="
+                      transition-transform
+                      duration-300
+                      group-hover/link:translate-x-1
+                      group-hover/link:-translate-y-0.5
+                    "
+                  >
                     ↗
                   </span>
                 </a>
@@ -411,19 +706,72 @@ export default function ProjectShowcase() {
         })}
       </div>
 
-      {/* Footer Details & Active Index Indicator */}
-      <div className="absolute bottom-6 left-6 z-[100] md:bottom-8 md:left-12">
-        <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-black/40">
+      {/* =====================================================
+          BOTTOM LEFT
+      ====================================================== */}
+
+      <div
+        className="
+          absolute
+          bottom-6
+          left-6
+          z-[100]
+          md:bottom-8
+          md:left-12
+        "
+      >
+        <p
+          className="
+            text-[9px]
+            font-mono
+            uppercase
+            tracking-[0.25em]
+            text-black/40
+          "
+        >
           Editorial Gallery
         </p>
       </div>
 
-      <div className="absolute bottom-6 right-6 z-[100] flex items-center gap-3 md:bottom-8 md:right-12">
-        <span className="text-[10px] font-mono font-bold tracking-[0.2em] text-black">
+      {/* =====================================================
+          BOTTOM RIGHT PROJECT INDEX
+      ====================================================== */}
+
+      <div
+        className="
+          absolute
+          bottom-6
+          right-6
+          z-[100]
+          flex
+          items-center
+          gap-3
+          md:bottom-8
+          md:right-12
+        "
+      >
+        <span
+          className="
+            text-[10px]
+            font-mono
+            font-bold
+            tracking-[0.2em]
+            text-black
+          "
+        >
           {String(activeIndex + 1).padStart(2, "0")}
         </span>
+
         <span className="h-px w-6 bg-black/30" />
-        <span className="text-[10px] font-mono tracking-[0.2em] text-black/40">
+
+        <span
+          className="
+            text-[10px]
+            font-mono
+            tracking-[0.2em]
+            text-black/40
+          "
+        >
           03
         </span>
       </div>

@@ -21,21 +21,21 @@ const socialLinks: SocialLink[] = [
     name: "GITHUB",
     handle: "@yourusername",
     href: "https://github.com/yourusername",
-    image: "/images/a1.jpeg",
+    image: "",
   },
   {
     number: "02",
     name: "LINKEDIN",
     handle: "Aavash Basnet",
     href: "https://linkedin.com/in/yourusername",
-    image: "/images/aab3.png",
+    image:"",
   },
   {
     number: "03",
     name: "INSTAGRAM",
     handle: "@yourusername",
     href: "https://instagram.com/yourusername",
-    image: "/images/a2.jpeg",
+    image: "",
   },
 ];
 
@@ -45,30 +45,7 @@ export default function SocialsSection() {
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([]);
   const footerRef = useRef<HTMLDivElement>(null);
 
-  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!hoveredImage) return;
-
-    const xTo = gsap.quickTo(previewRef.current, "x", {
-      duration: 0.35,
-      ease: "power3.out",
-    });
-    const yTo = gsap.quickTo(previewRef.current, "y", {
-      duration: 0.35,
-      ease: "power3.out",
-    });
-
-    const handleMouseMove = (e: MouseEvent) => {
-      xTo(e.clientX);
-      yTo(e.clientY);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [hoveredImage]);
-
   useEffect(() => {
     const section = sectionRef.current;
     const title = titleRef.current;
@@ -294,7 +271,7 @@ export default function SocialsSection() {
           <p
             className="
               mb-3
-              text-[9px]
+              text-[8px]
               font-mono
               font-medium
               uppercase
@@ -309,7 +286,7 @@ export default function SocialsSection() {
             ref={titleRef}
             className="
               font-display
-              text-[clamp(2.5rem,5vw,4.5rem)]
+              text-[clamp(2rem,3.5vw,3.2rem)]
               font-medium
               uppercase
               leading-[0.8]
@@ -332,8 +309,6 @@ export default function SocialsSection() {
               href={social.href}
               target="_blank"
               rel="noopener noreferrer"
-              onMouseEnter={() => setHoveredImage(social.image)}
-              onMouseLeave={() => setHoveredImage(null)}
               ref={(el) => {
                 linksRef.current[index] = el;
               }}
@@ -361,13 +336,13 @@ export default function SocialsSection() {
                 <span
                   className="
                     social-number
-                    text-[9px]
+                    text-[8px]
                     font-mono
                     tracking-[0.2em]
                     text-black/35
                     transition-colors
                     duration-300
-                    group-hover:text-black
+                  
                   "
                 >
                   {social.number}
@@ -382,14 +357,14 @@ export default function SocialsSection() {
                       social-name
                       block
                       font-display
-                      text-[clamp(1.8rem,4vw,3.5rem)]
+                      text-[clamp(1.3rem,2.8vw,2.4rem)]
                       font-medium
                       uppercase
                       leading-[0.9]
                       tracking-[-0.03em]
                       transition-transform
                       duration-500
-                      group-hover:translate-x-2
+                      
                     "
                   >
                     {social.name}
@@ -407,7 +382,7 @@ export default function SocialsSection() {
                       text-black/40
                       transition-transform
                       duration-500
-                      group-hover:translate-x-2
+               
                     "
                   >
                     {social.handle}
@@ -428,9 +403,6 @@ export default function SocialsSection() {
                   text-black/35
                   transition-all
                   duration-500
-                  group-hover:translate-x-2
-                  group-hover:-translate-y-2
-                  group-hover:text-black
                   md:text-3xl
                 "
               >
@@ -484,45 +456,13 @@ export default function SocialsSection() {
               w-fit
               transition-colors
               duration-300
-              hover:text-black
+            
             "
           >
             BACK TO TOP ↑
           </button>
         </div>
       </footer>
-
-      {/* WebGL Floating Social Preview */}
-      {hoveredImage && (
-        <div
-          ref={previewRef}
-          className="
-            pointer-events-none
-            fixed
-            left-0
-            top-0
-            z-50
-            h-60
-            w-44
-            -translate-x-1/2
-            -translate-y-1/2
-            overflow-hidden
-            rounded-xs
-            bg-[#DED9D2]
-            shadow-[0_25px_60px_rgba(0,0,0,0.2)]
-            transition-opacity
-            duration-300
-          "
-        >
-          <WebGLImage
-            src={hoveredImage}
-            alt="Preview"
-            fill
-            intensity={0.08}
-            className="h-full w-full"
-          />
-        </div>
-      )}
     </section>
   );
 }

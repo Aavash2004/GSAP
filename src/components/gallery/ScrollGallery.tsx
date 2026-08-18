@@ -67,14 +67,14 @@ export default function ScrollGallery() {
       const isMobile = window.innerWidth < 768;
 
       /*
-       * ---------------------------------------------------------
-       * INITIAL POSITIONS
-       * ---------------------------------------------------------
+       * =========================================================
+       * INITIAL CARD POSITIONS
+       * =========================================================
        */
 
       cards.forEach((card, index) => {
         if (index === 0) {
-          // Main image
+          // First image starts in the center
           gsap.set(card, {
             xPercent: -50,
             yPercent: -50,
@@ -86,7 +86,7 @@ export default function ScrollGallery() {
             zIndex: 50,
           });
         } else if (index === 1) {
-          // Next image waiting on the right
+          // Second image waits on the right
           gsap.set(card, {
             xPercent: -50,
             yPercent: -50,
@@ -98,7 +98,7 @@ export default function ScrollGallery() {
             zIndex: 30,
           });
         } else {
-          // Remaining cards hidden
+          // Remaining images are hidden
           gsap.set(card, {
             xPercent: -50,
             yPercent: -50,
@@ -113,9 +113,9 @@ export default function ScrollGallery() {
       });
 
       /*
-       * ---------------------------------------------------------
-       * SCROLL TIMELINE
-       * ---------------------------------------------------------
+       * =========================================================
+       * SCROLL ANIMATION
+       * =========================================================
        */
 
       const tl = gsap.timeline({
@@ -131,7 +131,9 @@ export default function ScrollGallery() {
       });
 
       /*
-       * Each image becomes the main image one after another.
+       * =========================================================
+       * IMAGE TRANSITIONS
+       * =========================================================
        */
 
       for (let step = 0; step < cards.length - 1; step++) {
@@ -139,8 +141,10 @@ export default function ScrollGallery() {
         const next = cards[step + 1];
 
         /*
-         * Current image moves to the left
+         * Current image moves to the left.
+         * This happens ONLY because of scrolling.
          */
+
         tl.to(
           current,
           {
@@ -156,8 +160,10 @@ export default function ScrollGallery() {
         );
 
         /*
-         * Next image moves into the center
+         * Next image moves into the center.
+         * Again, this is scroll-controlled only.
          */
+
         tl.to(
           next,
           {
@@ -176,6 +182,7 @@ export default function ScrollGallery() {
         /*
          * Prepare the following card on the right.
          */
+
         if (step + 2 < cards.length) {
           tl.set(
             cards[step + 2],
@@ -195,9 +202,9 @@ export default function ScrollGallery() {
       }
 
       /*
-       * ---------------------------------------------------------
-       * SUBTLE FINAL EXIT
-       * ---------------------------------------------------------
+       * =========================================================
+       * FINAL IMAGE
+       * =========================================================
        */
 
       const lastCard = cards[cards.length - 1];
@@ -232,6 +239,7 @@ export default function ScrollGallery() {
     <section
       ref={sectionRef}
       id="about"
+      data-cursor="default"
       className="
         relative
         h-screen
@@ -246,7 +254,7 @@ export default function ScrollGallery() {
       ======================================================= */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Very subtle light shape */}
+        {/* Soft light */}
 
         <div
           className="
@@ -261,7 +269,7 @@ export default function ScrollGallery() {
           "
         />
 
-        {/* Subtle contour lines */}
+        {/* Contour lines */}
 
         <svg
           className="
@@ -338,7 +346,14 @@ export default function ScrollGallery() {
           GALLERY
       ======================================================= */}
 
-      <div className="relative z-20 h-full w-full">
+      <div
+        className="
+          relative
+          z-20
+          h-full
+          w-full
+        "
+      >
         {images.map((image, index) => (
           <div
             key={image.id}
@@ -347,6 +362,7 @@ export default function ScrollGallery() {
                 cardsRef.current[index] = el;
               }
             }}
+            data-cursor="default"
             className="
               absolute
               left-1/2
@@ -358,7 +374,9 @@ export default function ScrollGallery() {
             "
           >
             <div className="relative">
-              {/* IMAGE */}
+              {/* ==================================================
+                  IMAGE
+              =================================================== */}
 
               <div
                 className="
@@ -379,17 +397,15 @@ export default function ScrollGallery() {
                   loading={index === 0 ? "eager" : "lazy"}
                   className="
                     object-cover
-                    transition-transform
-                    duration-700
-                    ease-out
                   "
                   sizes="(max-width: 768px) 65vw, 23vw"
                 />
 
-                {/* IMAGE NUMBER */}
+                {/* Image number */}
 
                 <div
                   className="
+                    pointer-events-none
                     absolute
                     left-3
                     top-3
@@ -405,7 +421,9 @@ export default function ScrollGallery() {
                 </div>
               </div>
 
-              {/* CAPTION */}
+              {/* ==================================================
+                  CAPTION
+              =================================================== */}
 
               <div
                 className="
@@ -446,11 +464,12 @@ export default function ScrollGallery() {
       </div>
 
       {/* ======================================================
-          BOTTOM INFORMATION
+          BOTTOM LEFT
       ======================================================= */}
 
       <div
         className="
+          pointer-events-none
           absolute
           bottom-7
           left-6
@@ -472,8 +491,13 @@ export default function ScrollGallery() {
         </p>
       </div>
 
+      {/* ======================================================
+          BOTTOM RIGHT
+      ======================================================= */}
+
       <div
         className="
+          pointer-events-none
           absolute
           bottom-7
           right-6
