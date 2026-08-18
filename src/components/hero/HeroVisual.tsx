@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
-import { gsap } from "gsap";
+import {gsap} from "gsap";
+import WebGLImage from "@/components/webgl/WebGLImage";
 
 export default function HeroVisual() {
   const visualRef = useRef<HTMLDivElement>(null);
@@ -85,13 +85,16 @@ export default function HeroVisual() {
           transformStyle: "preserve-3d",
         }}
       >
-        <Image
+        <WebGLImage
           src="/images/aab3.png"
           alt="Aavash Basnet"
+          fill={false}
           width={800}
           height={1000}
           priority
-          className="h-full w-auto object-contain object-bottom"
+          objectFit="contain"
+          intensity={0.06}
+          className="h-full w-auto"
         />
       </div>
     </div>

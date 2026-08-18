@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import WebGLImage from "@/components/webgl/WebGLImage";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SkillCategory } from "@/types/portfolio";
@@ -251,17 +251,17 @@ export default function AboutSection() {
                 >
                   <div className="relative">
                     <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xs bg-[#DED9D2] shadow-[0_20px_45px_rgba(0,0,0,0.09)]">
-                      <Image
+                      <WebGLImage
                         src={image.src}
                         alt={image.alt}
                         fill
                         priority={index === 0}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        className="object-cover"
+                        intensity={0.05}
                         sizes="(max-width: 768px) 70vw, 25vw"
+                        className="h-full w-full"
                       />
 
-                      <div className="absolute left-3 top-3 text-[8px] font-mono tracking-[0.18em] text-white/90 drop-shadow-md">
+                      <div className="pointer-events-none absolute left-3 top-3 z-20 text-[8px] font-mono tracking-[0.18em] text-white/90 drop-shadow-md">
                         {String(index + 1).padStart(2, "0")} / {String(galleryImages.length).padStart(2, "0")}
                       </div>
                     </div>

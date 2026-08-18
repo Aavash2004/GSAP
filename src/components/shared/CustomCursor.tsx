@@ -1,7 +1,19 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { gsap } from "gsap";
+
+const subscribeDesktop = (callback: () => void) => {
+  window.addEventListener("resize", callback);
+  return () => window.removeEventListener("resize", callback);
+};
+
+const getDesktopSnapshot = () => {
+  const isLargeScreen = window.innerWidth >= 768;
+  const isFinePointer = window.matchMedia("(pointer: fine)").matches;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return isLargeScreen && isFinePointer && !prefersReduced;
+};
 
 export default function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -9,23 +21,15 @@ export default function CustomCursor() {
   const [cursorText, setCursorText] = useState("");
   const [cursorType, setCursorType] = useState<"default" | "pointer" | "view" | "copy">("default");
   const [isVisible, setIsVisible] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+
+  const isDesktop = useSyncExternalStore(
+    subscribeDesktop,
+    getDesktopSnapshot,
+    () => false
+  );
 
   useEffect(() => {
-    // Check desktop & fine pointer device
-    const checkIsDesktop = () => {
-      const isLargeScreen = window.innerWidth >= 768;
-      const isFinePointer = window.matchMedia("(pointer: fine)").matches;
-      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      return isLargeScreen && isFinePointer && !prefersReduced;
-    };
-
-    if (!checkIsDesktop()) {
-      setIsDesktop(false);
-      return;
-    }
-
-    setIsDesktop(true);
+    if (!isDesktop) return;
 
     const cursor = cursorRef.current;
     if (!cursor) return;
@@ -81,7 +85,7 @@ export default function CustomCursor() {
       document.removeEventListener("mouseleave", handleMouseLeave);
       document.removeEventListener("mouseover", handleMouseOver);
     };
-  }, [isVisible]);
+  }, [isDesktop, isVisible]);
 
   if (!isDesktop) return null;
 

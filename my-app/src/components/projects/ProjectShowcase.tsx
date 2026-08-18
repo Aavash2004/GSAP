@@ -23,7 +23,7 @@ const projects = [
     description:
       "A modern real-estate platform for discovering and managing property listings.",
     tech: "NEXT.JS · REACT · TYPESCRIPT",
-    image: "/images/nepalgharjagga.png",
+    image: "/images/ghar.png",
     url: "#",
   },
   {

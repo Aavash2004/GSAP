@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import WebGLImage from "@/components/webgl/WebGLImage";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -495,14 +495,14 @@ export default function InspirationShowcase() {
                   shadow-[0_20px_50px_rgba(0,0,0,0.09)]
                 "
               >
-                <Image
-                  data-image
+                <WebGLImage
                   src={person.image}
                   alt={person.name}
                   fill
                   priority={index === 0}
-                  className="object-cover will-change-transform"
+                  intensity={0.07}
                   sizes="(max-width: 768px) 42vw, 22vw"
+                  className="h-full w-full"
                 />
 
                 <div

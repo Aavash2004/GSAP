@@ -78,7 +78,7 @@ export default function Hero() {
         <HeroHeadline />
       </div>
 
-      {/* Portrait */}
+      {/* Portrait Visual */}
       <div
         ref={visualRef}
         className="pointer-events-none absolute inset-0 z-10"

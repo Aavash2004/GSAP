@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import WebGLImage from "@/components/webgl/WebGLImage";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Project } from "@/types/portfolio";
@@ -26,7 +26,7 @@ const projects: Project[] = [
     description:
       "A high-end property discovery platform featuring real-time map integration, spatial filters, and minimal architectural aesthetics.",
     tech: "NEXT.JS · REACT · TYPESCRIPT · TAILWIND",
-    image: "/images/nepalgharjagga.png",
+    image: "/images/ghar.png",
     url: "#",
     year: "2025",
     category: "REAL ESTATE PLATFORM",
@@ -321,30 +321,24 @@ export default function ProjectShowcase() {
                   ${isActive ? "shadow-[0_30px_70px_rgba(0,0,0,0.15)]" : ""}
                 `}
               >
-                <Image
+                <WebGLImage
                   src={project.image}
                   alt={project.title}
                   fill
                   priority={index === 0}
-                  className="
-                    object-cover
-                    scale-105
-                    transition-transform
-                    duration-700
-                    ease-out
-                    group-hover:scale-110
-                  "
+                  intensity={0.06}
                   sizes="(max-width: 768px) 82vw, 42vw"
+                  className="h-full w-full"
                 />
 
-                <div className="absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="pointer-events-none absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                <div className="absolute left-4 top-4 rounded bg-black/60 px-2.5 py-1 text-[8px] font-mono tracking-[0.2em] text-white/90 backdrop-blur-xs">
+                <div className="pointer-events-none absolute left-4 top-4 z-20 rounded bg-black/60 px-2.5 py-1 text-[8px] font-mono tracking-[0.2em] text-white/90 backdrop-blur-xs">
                   {project.number} / 03
                 </div>
 
                 {project.category && (
-                  <div className="absolute right-4 top-4 rounded border border-white/20 bg-black/40 px-2.5 py-1 text-[8px] font-mono tracking-[0.18em] text-white/80 backdrop-blur-xs">
+                  <div className="pointer-events-none absolute right-4 top-4 z-20 rounded border border-white/20 bg-black/40 px-2.5 py-1 text-[8px] font-mono tracking-[0.18em] text-white/80 backdrop-blur-xs">
                     {project.category}
                   </div>
                 )}

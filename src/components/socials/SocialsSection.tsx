@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import WebGLImage from "@/components/webgl/WebGLImage";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,7 @@ interface SocialLink {
   name: string;
   handle: string;
   href: string;
+  image: string;
 }
 
 const socialLinks: SocialLink[] = [
@@ -19,18 +21,21 @@ const socialLinks: SocialLink[] = [
     name: "GITHUB",
     handle: "@yourusername",
     href: "https://github.com/yourusername",
+    image: "/images/a1.jpeg",
   },
   {
     number: "02",
     name: "LINKEDIN",
     handle: "Aavash Basnet",
     href: "https://linkedin.com/in/yourusername",
+    image: "/images/aab3.png",
   },
   {
     number: "03",
     name: "INSTAGRAM",
     handle: "@yourusername",
     href: "https://instagram.com/yourusername",
+    image: "/images/a2.jpeg",
   },
 ];
 
@@ -39,6 +44,30 @@ export default function SocialsSection() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([]);
   const footerRef = useRef<HTMLDivElement>(null);
+
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hoveredImage) return;
+
+    const xTo = gsap.quickTo(previewRef.current, "x", {
+      duration: 0.35,
+      ease: "power3.out",
+    });
+    const yTo = gsap.quickTo(previewRef.current, "y", {
+      duration: 0.35,
+      ease: "power3.out",
+    });
+
+    const handleMouseMove = (e: MouseEvent) => {
+      xTo(e.clientX);
+      yTo(e.clientY);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [hoveredImage]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -303,6 +332,8 @@ export default function SocialsSection() {
               href={social.href}
               target="_blank"
               rel="noopener noreferrer"
+              onMouseEnter={() => setHoveredImage(social.image)}
+              onMouseLeave={() => setHoveredImage(null)}
               ref={(el) => {
                 linksRef.current[index] = el;
               }}
@@ -460,6 +491,38 @@ export default function SocialsSection() {
           </button>
         </div>
       </footer>
+
+      {/* WebGL Floating Social Preview */}
+      {hoveredImage && (
+        <div
+          ref={previewRef}
+          className="
+            pointer-events-none
+            fixed
+            left-0
+            top-0
+            z-50
+            h-60
+            w-44
+            -translate-x-1/2
+            -translate-y-1/2
+            overflow-hidden
+            rounded-xs
+            bg-[#DED9D2]
+            shadow-[0_25px_60px_rgba(0,0,0,0.2)]
+            transition-opacity
+            duration-300
+          "
+        >
+          <WebGLImage
+            src={hoveredImage}
+            alt="Preview"
+            fill
+            intensity={0.08}
+            className="h-full w-full"
+          />
+        </div>
+      )}
     </section>
   );
 }

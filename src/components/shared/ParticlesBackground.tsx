@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 type Particle = {
   id: number;
@@ -10,20 +10,27 @@ type Particle = {
   duration: number;
 };
 
-export default function ParticlesBackground() {
-  const [particles, setParticles] = useState<Particle[]>([]);
+const emptySubscribe = () => () => {};
 
-  useEffect(() => {
-    setParticles(
-      Array.from({ length: 40 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        delay: Math.random() * 5,
-        duration: 4 + Math.random() * 6,
-      }))
-    );
-  }, []);
+const generateParticles = (): Particle[] =>
+  Array.from({ length: 40 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    delay: Math.random() * 5,
+    duration: 4 + Math.random() * 6,
+  }));
+
+export default function ParticlesBackground() {
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+
+  const [particles] = useState<Particle[]>(generateParticles);
+
+  if (!isMounted) return null;
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
