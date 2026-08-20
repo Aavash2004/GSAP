@@ -111,8 +111,8 @@ const socialLinks: SocialLink[] = [
   {
     number: "01",
     name: "GITHUB",
-    handle: "@yourusername",
-    href: "https://github.com/yourusername",
+    handle: "@Aavash2004",
+    href: "https://github.com/Aavash2004",
     icon: GithubIcon,
   },
   {
@@ -125,8 +125,8 @@ const socialLinks: SocialLink[] = [
   {
     number: "03",
     name: "INSTAGRAM",
-    handle: "@yourusername",
-    href: "https://instagram.com/yourusername",
+    handle: "@aa_shbsynt",
+    href: "https://instagram.com/aa_shbsynt",
     icon: InstagramIcon,
   },
 ];

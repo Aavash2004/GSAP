@@ -65,7 +65,7 @@ export default function Navbar() {
           }}
           className="group flex items-center gap-2 font-display text-sm uppercase tracking-[0.25em]"
         >
-          <span className="font-extrabold">AAVASH BASNET</span>
+          <span className="font-extrabold text-black">AAVASH BASNET</span>
           <span className="h-1.5 w-1.5 rounded-full bg-current opacity-40 transition-transform duration-300 group-hover:scale-150" />
         </a>
 
@@ -80,7 +80,7 @@ export default function Navbar() {
             }}
             className="group relative text-[10px] uppercase tracking-[0.26em] opacity-70 transition-opacity hover:opacity-100"
           >
-            <span>About</span>
+            <span className="text-black">About</span>
             <span className="absolute -bottom-1 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full" />
           </a>
 
@@ -93,7 +93,7 @@ export default function Navbar() {
             }}
             className="group relative text-[10px] uppercase tracking-[0.26em] opacity-70 transition-opacity hover:opacity-100"
           >
-            <span>Projects</span>
+            <span className="text-black">Projects</span>
             <span className="absolute -bottom-1 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full" />
           </a>
 
@@ -106,7 +106,7 @@ export default function Navbar() {
             }}
             className="group relative text-[10px] uppercase tracking-[0.26em] opacity-70 transition-opacity hover:opacity-100"
           >
-            <span>Socials</span>
+            <span className="text-black">Socials</span>
             <span className="absolute -bottom-1 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full" />
           </a>
         </nav>
